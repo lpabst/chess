@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-
 import './Home.css';
+
+import Square from './Square/Square.js';
 
 
 class Home extends Component {
@@ -18,16 +19,20 @@ class Home extends Component {
         ['R', 'H', 'B', 'K', 'Q', 'B', 'H', 'R'],
       ],
     }
+
+    this.selectPiece = this.selectPiece.bind(this);
+    this.renderBoard = this.renderBoard.bind(this);
+  }
+
+  selectPiece(i, j){
+    let pieceType = this.state.board[i][j];
+    console.log(pieceType, i, j);
   }
 
   renderBoard() {
     return this.state.board.map((row, i) => {
       var squares = row.map( (item, j) => {
-        let styles = {
-          background: (j % 2 === i % 2) ? '#fff' : '#000',
-          color: (j % 2 === i % 2) ? '#000' : '#fff'
-        }
-        return <div className="square" key={j} style={styles} >{item}</div>;
+        return <Square key={j} piece={item} handleClick={this.selectPiece} location={[i, j]} />
       })
       return <div className='row' key={i} >{squares}</div>;
     })
@@ -38,7 +43,7 @@ class Home extends Component {
       <div className="home">
 
         <div className='board'>
-          {this.renderBoard()}
+          { this.renderBoard() }
         </div>
 
       </div>

@@ -32,4 +32,6 @@
     font-weight: bold;
     text-align: center;
     line-height: 98px;
+    cursor: pointer;
+    user-select: none;
 }
