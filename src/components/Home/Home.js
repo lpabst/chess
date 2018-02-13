@@ -18,21 +18,41 @@ class Home extends Component {
         ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
         ['br', 'bh', 'bb', 'bk', 'bq', 'bb', 'bh', 'br'],
       ],
+      pieceSelected: false,
+      pieceType: '',
+      selectedPieceLocation: []
     }
 
-    this.selectPiece = this.selectPiece.bind(this);
+    this.clickSquare = this.clickSquare.bind(this);
     this.renderBoard = this.renderBoard.bind(this);
   }
 
-  selectPiece(i, j){
-    let pieceType = this.state.board[i][j];
-    console.log(pieceType, i, j);
+  clickSquare(i, j){
+    if (!this.state.pieceSelected && this.state.board[i][j]){
+      this.setState({
+        pieceSelected: true,
+        pieceType: this.state.board[i][j],
+        selectedPieceLocation: [i, j]
+      })
+    }
+    else if (this.state.pieceSelected && !this.state.board[i][j]){
+      let board = JSON.parse(JSON.stringify(this.state.board));
+      let oldLocation = this.state.selectedPieceLocation;
+      board[i][j] = this.state.pieceType;
+      board[oldLocation[0]][oldLocation[1]] = ''
+      this.setState({
+        pieceSelected: false,
+        pieceType: '',
+        selectedPieceLocation: [],
+        board: board
+      })
+    }
   }
 
   renderBoard() {
     return this.state.board.map((row, i) => {
       var squares = row.map( (item, j) => {
-        return <Square key={j} piece={item} handleClick={this.selectPiece} location={[i, j]} />
+        return <Square key={j} piece={item} handleClick={this.clickSquare} location={[i, j]} />
       })
       return <div className='row' key={i} >{squares}</div>;
     })
