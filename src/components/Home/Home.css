@@ -35,3 +35,12 @@
     cursor: pointer;
     user-select: none;
 }
+
+.piece{
+    width: 80px;
+    height: 80px;
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+}
+
