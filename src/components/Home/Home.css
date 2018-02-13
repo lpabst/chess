@@ -37,10 +37,11 @@
 }
 
 .piece{
-    width: 80px;
-    height: 80px;
+    width: 38px;
+    height: 98px;
     position: relative;
     overflow: hidden;
     background-size: cover;
+    margin: 0 auto;
 }
 
