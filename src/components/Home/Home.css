@@ -14,12 +14,14 @@
 }
 
 .warning{
-    font-size: 30px;
-    color: red;
+    width: 220px;
+    height: 100px;
+    font-size: 26px;
     font-weight: bold;
+    color: red;
     position: absolute;
-    left: calc(50% + 100px);
-    top: 30px;
+    left: calc(50% - 650px);
+    top: 300px;
 }
 
 .board{

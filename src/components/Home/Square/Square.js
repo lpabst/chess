@@ -9,6 +9,8 @@ class Square extends Component {
 
         if (i === this.props.selectedPieceLocation[0] && j === this.props.selectedPieceLocation[1]){
             squareBorder = '4px solid rgb(14, 255, 14)';
+        }else if (i === this.props.errorPieceLocation[0] && j == this.props.errorPieceLocation[1]){
+            squareBorder = '4px solid red';
         }else{
             for (let z = 0; z < availableMoves.length; z++){
                 if (i === availableMoves[z][0] && j === availableMoves[z][1]){

@@ -24,6 +24,7 @@ class Home extends Component {
       selectedPieceLocation: [],
       availableMoves: [],
       warningMessage: '',
+      errorPieceLocation: [],
     }
 
     this.selectPiece = this.selectPiece.bind(this);
@@ -40,7 +41,8 @@ class Home extends Component {
       pieceSelected: true,
       selectedPieceType: this.state.board[i][j],
       selectedPieceLocation: [i, j],
-      warningMessage: ''
+      warningMessage: '',
+      errorPieceLocation: [],
     }, () => {
 
       // Callback function gets the available moves for the selected piece
@@ -53,8 +55,8 @@ class Home extends Component {
       let checkObj = this.getCheckLocations(testBoard);
       if ( checkObj.check ){
         // remove all moves that result in same color check
-        console.log(checkObj.movesResultingInCheck);
-        console.log(availableMoves);
+        // console.log(checkObj.movesResultingInCheck);
+        // console.log(availableMoves);
         for (let a = 0; a < checkObj.movesResultingInCheck.length; a++){
           for (let b = availableMoves.length - 1; b >= 0; b--){
             if (availableMoves[b][0] === checkObj.movesResultingInCheck[a][0] && availableMoves[b][1] === checkObj.movesResultingInCheck[a][1]){
@@ -104,7 +106,8 @@ class Home extends Component {
             if (availableMoves[k][0] === currentPlayerKing[0] && availableMoves[k][1] === currentPlayerKing[1]){
               this.setState({
                 availableMoves: [],
-                warningMessage: 'Moving this piece would put you in check'
+                warningMessage: 'Moving this piece would put you in check',
+                errorPieceLocation: [i, j]
               })
               return;
             }
@@ -346,7 +349,8 @@ class Home extends Component {
           handleClick={this.clickSquare}
           location={[i, j]}
           selectedPieceLocation={this.state.selectedPieceLocation}
-          availableMoves={this.state.availableMoves} />
+          availableMoves={this.state.availableMoves}
+          errorPieceLocation={this.state.errorPieceLocation} />
       })
       return <div className='row' key={i} >{squares}</div>;
     })
