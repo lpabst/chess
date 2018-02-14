@@ -2,7 +2,7 @@
 
 This is a chess game built using the React Framework
 
-Current State: Able to move pieces in a turn based fashion. Partway through generating a list of available moves for selected piece
-Next Step: Figure out available moves for each piece 
-    - THEN limit the movement to those locaitons
+Current State: Able to move pieces in a turn based fashion. Piece movement is controlled by normal Chess rules
+Next Step: Putting someone in Check needs to limit their movement options
+
 

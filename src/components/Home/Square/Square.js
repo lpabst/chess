@@ -22,8 +22,7 @@ class Square extends Component {
             border: squareBorder
         }
         let pieceStyle = piece ? {
-            background: "url('/media/" + piece + ".jpg')center no-repeat",
-            backgroundSize: 'cover'
+            background: "url('/media/" + piece + ".jpg')center center /cover no-repeat",
         }
         : {}
 
