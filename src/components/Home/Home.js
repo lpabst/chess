@@ -23,10 +23,12 @@ class Home extends Component {
       selectedPieceType: '',
       selectedPieceLocation: [],
       availableMoves: [],
+      warningMessage: '',
     }
 
     this.selectPiece = this.selectPiece.bind(this);
     this.getAvailableMoves = this.getAvailableMoves.bind(this);
+    this.getCheckLocations = this.getCheckLocations.bind(this);
     this.movePieceToEmptySquare = this.movePieceToEmptySquare.bind(this);
     this.clickSquare = this.clickSquare.bind(this);
     this.renderBoard = this.renderBoard.bind(this);
@@ -37,14 +39,85 @@ class Home extends Component {
     this.setState({
       pieceSelected: true,
       selectedPieceType: this.state.board[i][j],
-      selectedPieceLocation: [i, j]
-    }, this.getAvailableMoves)
+      selectedPieceLocation: [i, j],
+      warningMessage: ''
+    }, () => {
+
+      // Callback function gets the available moves for the selected piece
+      let {board, selectedPieceType, selectedPieceLocation} = this.state;
+      let availableMoves = this.getAvailableMoves(board, selectedPieceType, selectedPieceLocation);
+
+      // If any move would result in your own king being in check remove it from the available moves list
+      let testBoard = JSON.parse(JSON.stringify(board));
+      
+      let checkObj = this.getCheckLocations(testBoard);
+      if ( checkObj.check ){
+        // remove all moves that result in same color check
+        console.log(checkObj.movesResultingInCheck);
+        console.log(availableMoves);
+        for (let a = 0; a < checkObj.movesResultingInCheck.length; a++){
+          for (let b = availableMoves.length - 1; b >= 0; b--){
+            if (availableMoves[b][0] === checkObj.movesResultingInCheck[a][0] && availableMoves[b][1] === checkObj.movesResultingInCheck[a][1]){
+              availableMoves.splice(b, 1);
+            }
+          }
+        }
+      }
+      this.setState({availableMoves}, () => this.limitMovesIfCheck(testBoard));
+
+    }) 
+  }
+
+  limitMovesIfCheck(board){
+    board[this.state.selectedPieceLocation[0]][this.state.selectedPieceLocation[1]] = '';
+    let currentPlayerColor = this.state.selectedPieceType.charAt(0);
+    let wkLocation;
+    let bkLocation;
+    let currentPlayerKing;
+
+    // Gets the locations of the two kings
+    for (let i = 0; i < 8; i++){
+      for (let j = 0; j < 8; j++){
+        if (board[i][j] === 'wk'){
+          wkLocation = [i, j];
+        }else if(board[i][j] === 'bk'){
+          bkLocation = [i, j];
+        }
+      }
+    }
+
+    if (currentPlayerColor === 'w'){
+      currentPlayerKing = wkLocation;
+    }else{
+      currentPlayerKing = bkLocation;
+    }
+
+    // Checks the location of each king against available moves for each piece **piece is in the way....
+    for (let i = 0; i < 8; i++){
+      for (let j = 0; j < 8; j++){
+        // For every sqaure, if it's not a king, and it's an opponent piece, get its available moves, and see if any of them are the same
+        // as the current player's king's position. If so, the currently selected piece on state cannot be moved, so set the available moves
+        // to an empty array.
+        if (board[i][j] !== '' && board[i][j].charAt(0) !== currentPlayerColor && board[i][j] !== 'wk' && board[i][j] !== 'bk'){
+          let availableMoves = this.getAvailableMoves(board, board[i][j], [i, j]);
+          for (let k = 0; k < availableMoves.length; k++){
+            if (availableMoves[k][0] === currentPlayerKing[0] && availableMoves[k][1] === currentPlayerKing[1]){
+              this.setState({
+                availableMoves: [],
+                warningMessage: 'Moving this piece would put you in check'
+              })
+              return;
+            }
+          }
+        }
+      }
+    }
   }
 
   // Gets all available moves for the currently selected piece. This is where most of the logic/rules happen for piece movement
-  getAvailableMoves() {
-    let board = this.state.board;
-    let { selectedPieceType, selectedPieceLocation } = this.state;
+  getAvailableMoves(board, selectedPieceType, selectedPieceLocation) {
+    // let board = this.state.board;
+    // let { selectedPieceType, selectedPieceLocation } = this.state;
     let availableMoves = [];
 
     let i = selectedPieceLocation[0];
@@ -161,7 +234,68 @@ class Home extends Component {
       checkValidMove(i+1, j-1, false, null, null);
     }
 
-    this.setState({ availableMoves })
+    return availableMoves;
+  }
+
+  getCheckLocations(board){
+    const resetBoard = JSON.parse(JSON.stringify(board));
+    let wkLocation;
+    let bkLocation;
+    let check = false;
+    let availableMoves = [];
+    let movesResultingInCheck = [];
+
+    // Gets the locations of the two kings
+    for (let i = 0; i < 8; i++){
+      for (let j = 0; j < 8; j++){
+
+        if (board[i][j] === 'wk'){
+          wkLocation = [i, j];
+        }else if(board[i][j] === 'bk'){
+          bkLocation = [i, j];
+        }
+
+      }
+    }
+
+    // Checks the location of each king against available moves for each piece **piece is in the way....
+    for (let i = 0; i < 8; i++){
+      for (let j = 0; j < 8; j++){
+        if (board[i][j] !== ''){
+          if (board[i][j] !== '' && board[i][j] !== 'wk' && board[i][j] !== 'bk'){
+            availableMoves = this.getAvailableMoves(board, board[i][j], [i, j]);
+            for (let index = 0; index < availableMoves.length; index++){
+              if (availableMoves[index][0] === bkLocation[0] && availableMoves[index][j] === bkLocation[1]){
+                check = true;
+                let move = {
+                  location: [i, j],
+                  whoseKingInCheck: 'b'
+                }
+                movesResultingInCheck.push(move);
+              }else if (availableMoves[index][0] === wkLocation[0] && availableMoves[index][j] === wkLocation[1]){
+                check = true;
+                let move = {
+                  location: [i, j],
+                  whoseKingInCheck: 'w'
+                }
+                movesResultingInCheck.push(move);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (check){
+      return {
+        check: true,
+        movesResultingInCheck: movesResultingInCheck
+      }
+    }
+    return {
+      check: false, 
+      movesResultingInCheck: movesResultingInCheck
+    };
   }
 
   // Moves the piece to a new location
@@ -223,6 +357,8 @@ class Home extends Component {
       <div className="home">
 
         <p className='turn'>{this.state.whoseTurn === 'w' ? 'White\'s turn' : "Black's turn"}</p>
+        <p className='warning' >{this.state.warningMessage}</p>
+
         <div className='board'>
           {this.renderBoard()}
         </div>

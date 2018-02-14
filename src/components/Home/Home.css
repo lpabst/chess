@@ -13,6 +13,15 @@
     text-align: center;
 }
 
+.warning{
+    font-size: 30px;
+    color: red;
+    font-weight: bold;
+    position: absolute;
+    left: calc(50% + 100px);
+    top: 30px;
+}
+
 .board{
     width: 800px;
     height: 800px;
