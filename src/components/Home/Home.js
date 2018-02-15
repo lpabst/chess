@@ -24,7 +24,7 @@ class Home extends Component {
       selectedPieceLocation: [],
       availableMoves: [],
       warningMessage: '',
-      errorPieceLocation: [],
+      errorPieceLocations: [],
     }
 
     this.selectPiece = this.selectPiece.bind(this);
@@ -35,37 +35,25 @@ class Home extends Component {
     this.renderBoard = this.renderBoard.bind(this);
   }
 
-  // Select a piece then gets the available moves for that piece
+  // Select a piece
   selectPiece(i, j) {
     this.setState({
       pieceSelected: true,
       selectedPieceType: this.state.board[i][j],
       selectedPieceLocation: [i, j],
       warningMessage: '',
-      errorPieceLocation: [],
+      errorPieceLocations: [],
     }, () => {
 
-      // Callback function gets the available moves for the selected piece
+      // Callback function gets the available moves for the selected piece and sets them on state
       let {board, selectedPieceType, selectedPieceLocation} = this.state;
       let availableMoves = this.getAvailableMoves(board, selectedPieceType, selectedPieceLocation);
 
-      // If any move would result in your own king being in check remove it from the available moves list
-      let testBoard = JSON.parse(JSON.stringify(board));
-      
-      let checkObj = this.getCheckLocations(testBoard);
-      if ( checkObj.check ){
-        // remove all moves that result in same color check
-        // console.log(checkObj.movesResultingInCheck);
-        // console.log(availableMoves);
-        for (let a = 0; a < checkObj.movesResultingInCheck.length; a++){
-          for (let b = availableMoves.length - 1; b >= 0; b--){
-            if (availableMoves[b][0] === checkObj.movesResultingInCheck[a][0] && availableMoves[b][1] === checkObj.movesResultingInCheck[a][1]){
-              availableMoves.splice(b, 1);
-            }
-          }
-        }
-      }
-      this.setState({availableMoves}, () => this.limitMovesIfCheck(testBoard));
+      this.setState({availableMoves}, () => {
+        // If moving the piece results in your own king being in check, limit that piece's movement
+        let testBoard = JSON.parse(JSON.stringify(board));
+        this.limitMovesIfCheck(testBoard)
+      });
 
     }) 
   }
@@ -94,26 +82,53 @@ class Home extends Component {
       currentPlayerKing = bkLocation;
     }
 
-    // Checks the location of each king against available moves for each piece **piece is in the way....
+    // Checks the location of the current player's king against available moves for each opponent piece 
+    let restulsInCheck = false;
+    let offendingPieces = [];
+    let availableMoves = [];
+
     for (let i = 0; i < 8; i++){
       for (let j = 0; j < 8; j++){
         // For every sqaure, if it's not a king, and it's an opponent piece, get its available moves, and see if any of them are the same
-        // as the current player's king's position. If so, the currently selected piece on state cannot be moved, so set the available moves
-        // to an empty array.
+        // as the current player's king's position. If so, mark that as an 'offending piece' and set resultsInCheck to true
         if (board[i][j] !== '' && board[i][j].charAt(0) !== currentPlayerColor && board[i][j] !== 'wk' && board[i][j] !== 'bk'){
-          let availableMoves = this.getAvailableMoves(board, board[i][j], [i, j]);
-          for (let k = 0; k < availableMoves.length; k++){
-            if (availableMoves[k][0] === currentPlayerKing[0] && availableMoves[k][1] === currentPlayerKing[1]){
-              this.setState({
-                availableMoves: [],
-                warningMessage: 'Moving this piece would put you in check',
-                errorPieceLocation: [i, j]
-              })
-              return;
+          let availableMovesForOpponentPiece = this.getAvailableMoves(board, board[i][j], [i, j]);
+          for (let k = 0; k < availableMovesForOpponentPiece.length; k++){
+            // go through the entire array of available moves for each opponent piece and check against current player's king's location
+            if (availableMovesForOpponentPiece[k][0] === currentPlayerKing[0] && availableMovesForOpponentPiece[k][1] === currentPlayerKing[1]){
+              restulsInCheck = true;
+              offendingPieces.push([i, j]);
+              console.log(offendingPieces)
             }
           }
         }
       }
+    }
+
+    // By now we know which pieces would put the king in check if the currently selected piece were to move. If there's
+    // only one offending piece, and our currently selected piece can kill it, that is the only available move for our
+    // currently selected piece. If there are more than one offending pieces, no available moves exist for our currently
+    // selected piece!
+    if (restulsInCheck){
+      console.log(offendingPieces);
+      if (offendingPieces.length === 1){
+        for (let m = 0; m < this.state.availableMoves.length; m++){
+          if (this.state.availableMoves[m][0] === offendingPieces[0][0] && this.state.availableMoves[m][1] === offendingPieces[0][1]){
+            console.log(availableMoves)
+            availableMoves = offendingPieces[0];
+            console.log(availableMoves)
+          }
+        }
+      }else{
+        console.log(offendingPieces.length)
+      }
+
+      this.setState({
+        availableMoves: availableMoves,
+        warningMessage: 'Moving this piece would put you in check',
+        errorPieceLocations: offendingPieces
+      })
+
     }
   }
 
@@ -350,7 +365,7 @@ class Home extends Component {
           location={[i, j]}
           selectedPieceLocation={this.state.selectedPieceLocation}
           availableMoves={this.state.availableMoves}
-          errorPieceLocation={this.state.errorPieceLocation} />
+          errorPieceLocations={this.state.errorPieceLocations} />
       })
       return <div className='row' key={i} >{squares}</div>;
     })

@@ -6,10 +6,19 @@ class Square extends Component {
         let [i, j] = this.props.location;
         let {piece, availableMoves} = this.props;
         let squareBorder;
+        let offendingPiece;
 
+        //determines if this sqaure contains a piece that places the enemy king in check
+        for (let p = 0; p < this.props.errorPieceLocations.length; p++){
+            if (i === this.props.errorPieceLocations[p][0] && j == this.props.errorPieceLocations[p][1]){
+                offendingPiece = true;
+            }
+        }
+
+        //determines the border styling for each square. red = offending piece, blue = available move, green = currently selected piece
         if (i === this.props.selectedPieceLocation[0] && j === this.props.selectedPieceLocation[1]){
             squareBorder = '4px solid rgb(14, 255, 14)';
-        }else if (i === this.props.errorPieceLocation[0] && j == this.props.errorPieceLocation[1]){
+        }else if (offendingPiece){
             squareBorder = '4px solid red';
         }else{
             for (let z = 0; z < availableMoves.length; z++){
