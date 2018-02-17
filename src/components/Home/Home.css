@@ -3,11 +3,11 @@
     width: 100%;
     min-height: 100vh;
     position: relative;
-    padding-top: 30px;
+    padding-top: 2vh;
 }
 
 .turn{
-    font-size: 30px;
+    font-size: 4vh;
     font-weight: bold;
     width: 100%;
     text-align: center;
@@ -20,29 +20,29 @@
     font-weight: bold;
     color: red;
     position: absolute;
-    left: calc(50% - 650px);
+    left: calc(50% - (45vh + 230px));
     top: 300px;
 }
 
 .board{
-    width: 800px;
-    height: 800px;
+    width: 90vh;
+    height: 90vh;
     position: absolute;
-    left: calc(50% - 400px);
-    top: calc(50% - 400px);
+    left: calc(50% - 45vh);
+    top: 6vh;
     border: 5px solid #555;
 }
 
 .row{
     width: 100%;
-    height: 99px;
+    height: 12.5%;
     position: relative;
     display: block;
 }
 
 .square{
-    width: 98.7px;
-    height: 99px;
+    width: 12.5%;
+    height: 100%;
     position: relative;
     float: left;
     font-size: 60px;
@@ -53,8 +53,8 @@
 }
 
 .piece{
-    width: 38px;
-    height: 99px;
+    width: 38%;
+    height: 100%;
     position: relative;
     overflow: hidden;
     background-size: cover;
