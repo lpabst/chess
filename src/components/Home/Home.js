@@ -34,6 +34,7 @@ class Home extends Component {
     this.selectPiece = this.selectPiece.bind(this);
     this.getAvailableMoves = this.getAvailableMoves.bind(this);
     this.limitMovesIfCheck = this.limitMovesIfCheck.bind(this);
+    this.testForCheck = this.testForCheck.bind(this);
     this.getCheckLocations = this.getCheckLocations.bind(this);
     this.movePieceToNewSquare = this.movePieceToNewSquare.bind(this);
     this.clickSquare = this.clickSquare.bind(this);
@@ -46,7 +47,7 @@ class Home extends Component {
   }
   
   startTurn(){
-    let allMoves = this.getAllAvailableMoves();
+    let allMoves = this.getAllAvailableMoves(null, null, true);
 
     if (!allMoves.hasAvailableMoves){
       alert('Game Over!');
@@ -64,10 +65,10 @@ class Home extends Component {
   }
 
   // Gets all of the available moves for a player
-  getAllAvailableMoves(arr, whoseTurn){
-    arr = arr || [];
+  getAllAvailableMoves(whoseTurn, board, limitToLegalMoves){
+    let arr = [];
     whoseTurn = whoseTurn || this.state.whoseTurn;
-    let board = this.state.board;
+    board = board || this.state.board;
     let hasAvailableMoves = false;
 
     //goes through the whole board and creates a blank array for each board spot
@@ -76,8 +77,8 @@ class Home extends Component {
       for (let j = 0; j <= 7; j++){
         arr[i][j] = [];
         // if and only if the piece at that spot is the color of the person whose turn it is, replace the blank array of moves with a valid array of moves for that piece.
-        if (board[i][j] && board[i][j].charAt(0) === this.state.whoseTurn){
-          let moves = this.getAvailableMoves(board, board[i][j], [i, j], true);
+        if (board[i][j] && board[i][j].charAt(0) === whoseTurn){
+          let moves = this.getAvailableMoves(board, board[i][j], [i, j], limitToLegalMoves);
           arr[i][j] = moves;
           if (moves.length > 0){
             hasAvailableMoves = true;
@@ -228,7 +229,7 @@ class Home extends Component {
     }
 
     // Limit the moves for this piece to avoid illegal moves that result in your own check
-    if (this.limitToLegalMoves){
+    if (limitToLegalMoves){
       availableMoves = this.limitMovesIfCheck(availableMoves, [i, j]);
     }
     return availableMoves;
@@ -244,24 +245,10 @@ class Home extends Component {
       for (let j = 0; j < 8; j++){
         if (board[i][j].charAt(1) === 'k' && board[i][j].charAt(0) === currentPlayerColor){
           kingLocation = [i, j];
+          i = 10;
+          j = 10;
         }
       }
-    }
-
-    function testForCheck(board, kingLocation){
-      let opponentsTurn = this.state.whoseTurn === 'w' ? 'b' : 'w';
-      let opponentsMoves = this.getAllAvailableMoves(board, opponentsTurn);
-      for (let i = 0; i < opponentsMoves.length; i++){
-        for (let j = 0; j < opponentsMoves[i].length; j++){
-          let arr = opponentsMoves[i][j];
-          for (let k = 0; k < arr.length; k++){
-            if (arr[k][0] === kingLocation[0] && arr[k][1] === kingLocation[1]){
-              return true;
-            }
-          }
-        }
-      }
-      return false;
     }
 
     // for each available move in the array, move the piece there, then check for check. 
@@ -275,12 +262,11 @@ class Home extends Component {
       let piece = testBoard[pi][pj];
       testBoard[mi][mj] = piece;
       testBoard[pi][pj] = '';
-      let check = testForCheck(testBoard, kingLocation);
+      let check = this.testForCheck(testBoard, kingLocation);
       if (check){
         moves.splice(i, 1);
       }
     }
-
     return moves;
 /*
     // Checks the location of the current player's king against available moves for each opponent piece 
@@ -332,6 +318,22 @@ class Home extends Component {
 
     }
 */
+  }
+
+  testForCheck(board, kingLocation){
+    let opponentsTurn = this.state.whoseTurn === 'w' ? 'b' : 'w';
+    let opponentsMoves = this.getAllAvailableMoves(opponentsTurn, board, null).moves;
+    for (let c = 0; c < 8; c++){
+      for (let d = 0; d < 8; d++){
+        let arr = opponentsMoves[c][d];
+        for (let k = 0; k < arr.length; k++){
+          if (arr[k][0] === kingLocation[0] && arr[k][1] === kingLocation[1]){
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   getCheckLocations(board){
