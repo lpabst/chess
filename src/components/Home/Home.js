@@ -50,11 +50,34 @@ class Home extends Component {
     let allMoves = this.getAllAvailableMoves(null, null, true);
 
     if (!allMoves.hasAvailableMoves){
-      alert('Game Over!');
+
+      // Check if it's stalemate or checkmate
+      let kingLocation;
+      let isInCheck;
+      let {board} = this.state;
+      
+      // Gets the location of the current player's king
+      for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+          if (board[i][j].charAt(1) === 'k' && board[i][j].charAt(0) === this.state.whoseTurn){
+            kingLocation = [i, j];
+            i = 10;
+            j = 10;
+          }
+        }
+      }
+      
+      isInCheck = this.testForCheck(board, kingLocation);
+      if (isInCheck){
+        alert('CheckMate!');
+      }else{
+        alert('StaleMate!');
+      }
+
       this.setState({
         gameover: true
       })
-      //  **** check for checkmate / stalemate ****
+
     }else{
       // allow the user to click a piece and make a move
       this.setState({
