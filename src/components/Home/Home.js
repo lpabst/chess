@@ -28,6 +28,7 @@ class Home extends Component {
       warningMessage: '',
       errorPieceLocations: [],
       endGameMessage: '',
+      showSettings: true,
     }
 
     this.startNewGame = this.startNewGame.bind(this);
@@ -39,6 +40,8 @@ class Home extends Component {
     this.testForCheck = this.testForCheck.bind(this);
     this.movePieceToNewSquare = this.movePieceToNewSquare.bind(this);
     this.clickSquare = this.clickSquare.bind(this);
+    this.toggleSettings = this.toggleSettings.bind(this);
+    this.closeSettings = this.closeSettings.bind(this);
     this.renderBoard = this.renderBoard.bind(this);
     
   }
@@ -387,6 +390,18 @@ class Home extends Component {
     }
   }
 
+  toggleSettings(){
+    this.setState({
+      showSettings: !this.state.showSettings
+    })
+  }
+
+  closeSettings(){
+    this.setState({
+      showSettings: false
+    })
+  }
+
   renderBoard() {
     return this.state.board.map((row, i) => {
       var squares = row.map((item, j) => {
@@ -408,16 +423,49 @@ class Home extends Component {
 
         <p className='turn'>{this.state.whoseTurn === 'w' ? 'White\'s turn' : "Black's turn"}</p>
         <p className='warning' >{this.state.warningMessage}</p>
+        <button onClick={this.toggleSettings} className='settings_toggle' >Settings</button>
 
         <div className='board'>
           {this.renderBoard()}
         </div>
 
-        {
-          this.state.gameover ? 
+        { this.state.gameover ? 
             <div className='gameover_div'>
               <p className='endgame_message'>{this.state.endGameMessage}</p>
               <button className='start_over' onClick={this.startNewGame} >Start Over</button>
+            </div>
+          : null
+        }
+
+        { this.state.showSettings ? 
+            <div className='settings_div'>
+
+              <p className='close_x' onClick={this.closeSettings} >X</p>
+
+              <div className='setting_row'>
+                <p>Settings</p>
+              </div>
+
+              <div className='setting_row'>
+                <p>Play as </p>
+                <select>
+                  <option>Black</option>
+                  <option>White</option>
+                </select>
+              </div>
+
+              <div className='setting_row'>
+                <p>Player 2</p>
+                <select>
+                  <option>Computer</option>
+                  <option>Human</option>
+                </select>
+              </div>
+
+              <div className='setting_row'>
+                <button onClick={this.startNewGame} >Start New Game</button>
+              </div>
+
             </div>
           : null
         }
