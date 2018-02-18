@@ -10,7 +10,7 @@ class Square extends Component {
 
         //determines if this sqaure contains a piece that places the enemy king in check
         for (let p = 0; p < this.props.errorPieceLocations.length; p++){
-            if (i === this.props.errorPieceLocations[p][0] && j == this.props.errorPieceLocations[p][1]){
+            if (i === this.props.errorPieceLocations[p][0] && j === this.props.errorPieceLocations[p][1]){
                 offendingPiece = true;
             }
         }
