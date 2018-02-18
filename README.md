@@ -2,10 +2,10 @@
 
 This is a chess game built using the React Framework
 
-Current State: Able to move pieces in a turn based fashion. Piece movement is controlled by normal Chess rules. Placing yourself in check is no longer allowed, see below for exception
-Next Step: moving the piece that would put you in check should be allowed if it kills the offending piece or continues to block the offending piece!
+Current State: Able to play the game and it just about works. All the pieces move like they should, putting someone in check limits their movements, etc...
 
-**selecting piece that should be able to kill offending piece nothing happens...
+Next Step: killing the piece that has you in check with your king shouldn't be allowed if there's a piece protecting it since you'd still be in check. Need to double check the functions that look at limiting legal moves and putting someone in check
+
 
 algorithm overview
 - start turn
