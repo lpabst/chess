@@ -2,9 +2,11 @@
 
 This is a chess game built using the React Framework
 
-Current State: Able to play the game and it just about works. All the pieces move like they should, putting someone in check limits their movements, etc...
+Current State: Able to play the game like normal, but without castling or au passant.
 
-Next Step: killing the piece that has you in check with your king shouldn't be allowed if there's a piece protecting it since you'd still be in check. Need to double check the functions that look at limiting legal moves and putting someone in check
+Next Step: finish settings modal so that it works and updates the new game mode. 
+    - Then add in au passant and castling with the proper rules
+    - Then add in an AI to play player 2!
 
 
 algorithm overview

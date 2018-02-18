@@ -27,23 +27,53 @@ class Home extends Component {
       availableMoves: [],
       warningMessage: '',
       errorPieceLocations: [],
+      endGameMessage: '',
+      showSettings: true,
     }
 
+    this.startNewGame = this.startNewGame.bind(this);
     this.startTurn = this.startTurn.bind(this);
     this.getAllAvailableMoves = this.getAllAvailableMoves.bind(this);
     this.selectPiece = this.selectPiece.bind(this);
     this.getAvailableMoves = this.getAvailableMoves.bind(this);
     this.limitMovesIfCheck = this.limitMovesIfCheck.bind(this);
     this.testForCheck = this.testForCheck.bind(this);
-    this.getCheckLocations = this.getCheckLocations.bind(this);
     this.movePieceToNewSquare = this.movePieceToNewSquare.bind(this);
     this.clickSquare = this.clickSquare.bind(this);
+    this.toggleSettings = this.toggleSettings.bind(this);
+    this.closeSettings = this.closeSettings.bind(this);
     this.renderBoard = this.renderBoard.bind(this);
     
   }
 
   componentDidMount(){
     this.startTurn();
+  }
+
+  // Resets state and starts a new game
+  startNewGame(){
+    this.setState({
+      gameover: false,
+      board: [
+        ['wr', 'wh', 'wb', 'wk', 'wq', 'wb', 'wh', 'wr'],
+        ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+        ['br', 'bh', 'bb', 'bk', 'bq', 'bb', 'bh', 'br'],
+      ],
+      whoseTurn: 'w',
+      allPiecesMoves: [],
+      pieceSelected: false,
+      selectedPieceType: '',
+      selectedPieceLocation: [],
+      availableMoves: [],
+      warningMessage: '',
+      errorPieceLocations: [],
+      endGameMessage: '',
+    }, this.startTurn)
   }
   
   startTurn(){
@@ -52,30 +82,21 @@ class Home extends Component {
     if (!allMoves.hasAvailableMoves){
 
       // Check if it's stalemate or checkmate
-      let kingLocation;
-      let isInCheck;
+      let endGameMessage;
       let {board} = this.state;
-      
-      // Gets the location of the current player's king
-      for (let i = 0; i < 8; i++){
-        for (let j = 0; j < 8; j++){
-          if (board[i][j].charAt(1) === 'k' && board[i][j].charAt(0) === this.state.whoseTurn){
-            kingLocation = [i, j];
-            i = 10;
-            j = 10;
-          }
-        }
-      }
-      
-      isInCheck = this.testForCheck(board, kingLocation);
+      let kingLocation = this.getKingLocation(this.state.whoseTurn);
+      let isInCheck = this.testForCheck(board, kingLocation);
+
       if (isInCheck){
-        alert('CheckMate!');
+        let whoWon = this.state.whoseTurn === 'w' ? 'Black' : 'White';
+        endGameMessage = 'Checkmate!!! ' + whoWon + ' wins!';
       }else{
-        alert('StaleMate!');
+        endGameMessage = 'StaleMate! It\'s a tie';
       }
 
       this.setState({
-        gameover: true
+        gameover: true,
+        endGameMessage: endGameMessage,
       })
 
     }else{
@@ -83,6 +104,20 @@ class Home extends Component {
       this.setState({
         allPiecesMoves: allMoves,
       })
+    }
+
+  }
+
+  // returns the location of the king (for whatever color you pass in);
+  getKingLocation(color){
+    let {board} = this.state;
+
+    for (let i = 0; i < 8; i++){
+      for (let j = 0; j < 8; j++){
+        if (board[i][j].charAt(1) === 'k' && board[i][j].charAt(0) === color){
+          return [i, j];
+        }
+      }
     }
 
   }
@@ -262,20 +297,9 @@ class Home extends Component {
   // Takes the list of available moves for a piece, finds any of those that result in your own king being in check,
   // and removes them from the available list since you can't place yourself in check
   limitMovesIfCheck(moves, pieceLocation){
-    let currentPlayerColor = this.state.whoseTurn;
     let board = this.state.board;
-    let kingLocation;
-
-    // Gets the location of the current player's king
-    for (let i = 0; i < 8; i++){
-      for (let j = 0; j < 8; j++){
-        if (board[i][j].charAt(1) === 'k' && board[i][j].charAt(0) === currentPlayerColor){
-          kingLocation = [i, j];
-          i = 10;
-          j = 10;
-        }
-      }
-    }
+    let currentPlayerColor = this.state.whoseTurn;
+    let kingLocation = this.getKingLocation(currentPlayerColor);
 
     // for each available move in the array, move the piece there, then check for check. 
     // If we're in check after that move, then it's not a legal move, so remove it from the array.
@@ -288,6 +312,12 @@ class Home extends Component {
       let piece = testBoard[pi][pj];
       testBoard[mi][mj] = piece;
       testBoard[pi][pj] = '';
+
+      // if they moved the king, make sure to update the king's location before testing for check
+      if (piece.charAt(1) === 'k'){
+        kingLocation = [mi, mj];
+      }
+
       let check = this.testForCheck(testBoard, kingLocation);
       if (check){
         moves.splice(i, 1);
@@ -313,67 +343,6 @@ class Home extends Component {
       }
     }
     return false;
-  }
-
-  getCheckLocations(board){
-    const resetBoard = JSON.parse(JSON.stringify(board));
-    let wkLocation;
-    let bkLocation;
-    let check = false;
-    let availableMoves = [];
-    let movesResultingInCheck = [];
-
-    // Gets the locations of the two kings
-    for (let i = 0; i < 8; i++){
-      for (let j = 0; j < 8; j++){
-
-        if (board[i][j] === 'wk'){
-          wkLocation = [i, j];
-        }else if(board[i][j] === 'bk'){
-          bkLocation = [i, j];
-        }
-
-      }
-    }
-
-    // Checks the location of each king against available moves for each piece **piece is in the way....
-    for (let i = 0; i < 8; i++){
-      for (let j = 0; j < 8; j++){
-        if (board[i][j] !== ''){
-          if (board[i][j] !== '' && board[i][j] !== 'wk' && board[i][j] !== 'bk'){
-            availableMoves = this.getAvailableMoves(board, board[i][j], [i, j]);
-            for (let index = 0; index < availableMoves.length; index++){
-              if (availableMoves[index][0] === bkLocation[0] && availableMoves[index][j] === bkLocation[1]){
-                check = true;
-                let move = {
-                  location: [i, j],
-                  whoseKingInCheck: 'b'
-                }
-                movesResultingInCheck.push(move);
-              }else if (availableMoves[index][0] === wkLocation[0] && availableMoves[index][j] === wkLocation[1]){
-                check = true;
-                let move = {
-                  location: [i, j],
-                  whoseKingInCheck: 'w'
-                }
-                movesResultingInCheck.push(move);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (check){
-      return {
-        check: true,
-        movesResultingInCheck: movesResultingInCheck
-      }
-    }
-    return {
-      check: false, 
-      movesResultingInCheck: movesResultingInCheck
-    };
   }
 
   // Moves the piece to a new location AND starts the new person's turn
@@ -421,6 +390,18 @@ class Home extends Component {
     }
   }
 
+  toggleSettings(){
+    this.setState({
+      showSettings: !this.state.showSettings
+    })
+  }
+
+  closeSettings(){
+    this.setState({
+      showSettings: false
+    })
+  }
+
   renderBoard() {
     return this.state.board.map((row, i) => {
       var squares = row.map((item, j) => {
@@ -442,10 +423,52 @@ class Home extends Component {
 
         <p className='turn'>{this.state.whoseTurn === 'w' ? 'White\'s turn' : "Black's turn"}</p>
         <p className='warning' >{this.state.warningMessage}</p>
+        <button onClick={this.toggleSettings} className='settings_toggle' >Settings</button>
 
         <div className='board'>
           {this.renderBoard()}
         </div>
+
+        { this.state.gameover ? 
+            <div className='gameover_div'>
+              <p className='endgame_message'>{this.state.endGameMessage}</p>
+              <button className='start_over' onClick={this.startNewGame} >Start Over</button>
+            </div>
+          : null
+        }
+
+        { this.state.showSettings ? 
+            <div className='settings_div'>
+
+              <p className='close_x' onClick={this.closeSettings} >X</p>
+
+              <div className='setting_row'>
+                <p>Settings</p>
+              </div>
+
+              <div className='setting_row'>
+                <p>Play as </p>
+                <select>
+                  <option>Black</option>
+                  <option>White</option>
+                </select>
+              </div>
+
+              <div className='setting_row'>
+                <p>Player 2</p>
+                <select>
+                  <option>Computer</option>
+                  <option>Human</option>
+                </select>
+              </div>
+
+              <div className='setting_row'>
+                <button onClick={this.startNewGame} >Start New Game</button>
+              </div>
+
+            </div>
+          : null
+        }
 
       </div>
     );
