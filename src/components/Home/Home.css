@@ -70,7 +70,6 @@
     overflow: hidden;
     background-size: cover;
     margin: 0 auto;
-    transition: all 0.4s;
 }
 
 .gameover_div{

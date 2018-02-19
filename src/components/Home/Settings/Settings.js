@@ -39,6 +39,14 @@ class Settings extends Component {
         </div>
 
         <div className='setting_row'>
+          <p>Rotate Board</p>
+          <select value={this.props.rotateBoard} onChange={(e) => this.props.updateState(e, 'rotateBoard')} >
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+
+        <div className='setting_row'>
           <button onClick={this.props.startNewGame} >Start New Game</button>
         </div>
 

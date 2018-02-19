@@ -11,7 +11,9 @@ class Home extends Component {
     this.state = {
       playAs: 'White',
       player2: 'Human',
+      rotateBoard: 'Yes',
       boardRotation: 180,
+      firstTurn: true,
       gameover: false,
       board: [
         ['wr', 'wh', 'wb', 'wk', 'wq', 'wb', 'wh', 'wr'],
@@ -56,11 +58,12 @@ class Home extends Component {
 
   // Resets state and starts a new game
   startNewGame(){
-    let rotate = this.state.playAs === 'White' ? 0 : 180;
+    let rotate = this.state.playAs === 'White' ? 180 : 0;
 
     this.setState({
       gameover: false,
       boardRotation: rotate,
+      firstTurn: true,
       board: [
         ['wr', 'wh', 'wb', 'wk', 'wq', 'wb', 'wh', 'wr'],
         ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
@@ -108,7 +111,10 @@ class Home extends Component {
 
     }else{
       // flip the board around on each turn
-      let rotate = this.state.boardRotation === 180 ? 0 : 180;
+      let rotate = this.state.boardRotation;
+      if (this.state.rotateBoard === 'Yes' && !this.state.firstTurn){
+        rotate = rotate === 0 ? 180 : 0;
+      }
 
       // allow the user to click a piece and make a move
       this.setState({
@@ -361,7 +367,14 @@ class Home extends Component {
     let board = JSON.parse(JSON.stringify(this.state.board));
     let oldLocation = this.state.selectedPieceLocation;
     let newTurn = this.state.whoseTurn === 'w' ? 'b' : 'w';
-    board[i][j] = this.state.selectedPieceType;
+    let pieceType = this.state.selectedPieceType;
+
+    // If a pawn advanced to the end of the board, allow a new piece to be chosen as replacement
+    if ( (i === 0 || i === 7) && this.state.selectedPieceType.charAt(1) === 'p'){
+      pieceType = pieceType.substring(0,1) + 'q';
+    }
+
+    board[i][j] = pieceType;
     board[oldLocation[0]][oldLocation[1]] = '';
 
     this.setState({
@@ -371,7 +384,10 @@ class Home extends Component {
       board: board,
       whoseTurn: newTurn,
       availableMoves: [],
-    }, this.startTurn)
+      firstTurn: false,
+    }, () => {
+      this.startTurn()
+    }) 
   }
 
   // Determines what happens when you click on a square on the board
@@ -459,7 +475,8 @@ class Home extends Component {
             startNewGame={this.startNewGame} 
             updateState={this.updateState}
             playAs={this.state.playAs}
-            player2={this.state.player2} />
+            player2={this.state.player2}
+            rotateBoard={this.state.rotateBoard} />
           : null
         }
 
