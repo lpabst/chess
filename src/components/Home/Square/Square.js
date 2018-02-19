@@ -34,6 +34,7 @@ class Square extends Component {
         }
         let pieceStyle = piece ? {
             background: "url('/media/" + piece + ".jpg')center center /cover no-repeat",
+            transform: this.props.rotate
         }
         : {}
 

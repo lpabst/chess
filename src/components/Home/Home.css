@@ -25,9 +25,11 @@
 }
 
 .settings_toggle{
+    height: 3vh;
+    font-size: 2vh;
     position: absolute;
-    top: 20%;
-    left: calc(50% - 65vh);
+    top: 2vh;
+    left: calc(50% - 40vh);
     cursor: pointer;
     user-select: none;
 }
@@ -39,6 +41,7 @@
     left: calc(50% - 45vh);
     top: 6vh;
     border: 5px solid #555;
+    transition: all 0.4s;
 }
 
 .row{
@@ -116,6 +119,7 @@
     top: 15px;
     right: 15px;
     cursor: pointer;
+    user-select: none;
 }
 
 .setting_row{
