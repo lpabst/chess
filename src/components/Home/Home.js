@@ -88,6 +88,12 @@ class Home extends Component {
     }, this.startTurn)
   }
   
+  /* 
+    Checks if there are available moves for the current player. If not, the game is over, so it
+    checks if it's stalemate or checkmate. If there ARE available moves, it rotates the board if
+    that is a setting that is enabled, then checks if the opponent is the computer. If so, it 
+    triggers the function that makes a move for the computer
+  */ 
   startTurn(){
     let allMoves = this.getAllAvailableMoves(null, null, true);
 
@@ -135,6 +141,7 @@ class Home extends Component {
 
   }
 
+  // Makes a move for the computer player
   getComputerMove(){
     let moves = this.state.allPiecesMoves.moves;
     let {board} = this.state;
