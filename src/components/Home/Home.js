@@ -45,11 +45,16 @@ class Home extends Component {
           leftRookHasMoved: false,
           rightRookHasMoved: false,
         }
-      }
+      },
+      whitePieces: 0,
+      blackPieces: 0,
+      stalemateKingMoveCount: 0,
     }
 
     this.startNewGame = this.startNewGame.bind(this);
     this.startTurn = this.startTurn.bind(this);
+    this.endGame = this.endGame.bind(this);
+    this.countEachPlayersPieces = this.countEachPlayersPieces.bind(this);
     this.getComputerMove = this.getComputerMove.bind(this);
     this.getAllAvailableMoves = this.getAllAvailableMoves.bind(this);
     this.selectPiece = this.selectPiece.bind(this);
@@ -119,28 +124,14 @@ class Home extends Component {
   */ 
   startTurn(){
     let allMoves = this.getAllAvailableMoves(null, null, true);
+    let {board} = this.state;
+
+    this.countEachPlayersPieces(board);
 
     if (!allMoves.hasAvailableMoves){
-
-      // Check if it's stalemate or checkmate
-      let endGameMessage;
-      let {board} = this.state;
-      let kingLocation = this.getKingLocation(this.state.whoseTurn);
-      let isInCheck = this.testForCheck(board, kingLocation);
-
-      if (isInCheck){
-        let whoWon = this.state.whoseTurn === 'w' ? 'Black' : 'White';
-        endGameMessage = 'Checkmate!!! ' + whoWon + ' wins!';
-      }else{
-        endGameMessage = 'StaleMate! It\'s a tie game';
-      }
-
-      this.setState({
-        gameover: true,
-        warningMessage: endGameMessage,
-      })
-
-    }else{
+      this.endGame(board);
+    }
+    else{
       // flip the board around on each turn if that setting is selected and it's not the beginning of the game
       let rotate = this.state.boardRotation;
       if (this.state.rotateBoard === 'Yes' && !this.state.firstTurn){
@@ -158,10 +149,48 @@ class Home extends Component {
           this.getComputerMove();
         }
       })
-  
-
     }
 
+  }
+
+  // ends the game
+  endGame(board){
+    // Check if it's stalemate or checkmate
+    let endGameMessage;
+    let kingLocation = this.getKingLocation(this.state.whoseTurn);
+    let isInCheck = this.testForCheck(board, kingLocation);
+
+    if (isInCheck){
+      let whoWon = this.state.whoseTurn === 'w' ? 'Black' : 'White';
+      endGameMessage = 'Checkmate!!! ' + whoWon + ' wins!';
+    }else{
+      endGameMessage = 'StaleMate! It\'s a tie game';
+    }
+
+    this.setState({
+      gameover: true,
+      warningMessage: endGameMessage,
+    })
+  }
+
+  // counts how many pieces each player has left and sets it on state
+  countEachPlayersPieces(board){
+    let whitePieces = 0;
+    let blackPieces = 0;
+
+    // Check how many pieces each player has left;
+    for (let row = 0; row < 8; row++){
+      for (let col = 0; col < 8; col++){
+        if (board[row][col] && board[row][col].charAt(0) === 'w'){
+          whitePieces++;
+        }
+        else if (board[row][col] && board[row][col].charAt(0) === 'b'){
+          blackPieces++;
+        }
+      }
+    }
+
+    this.setState({whitePieces, blackPieces})
   }
 
   // Makes a move for the computer player
@@ -455,7 +484,7 @@ class Home extends Component {
             let tempJ = mj > pj ? pieceLocation[1] + 1 : pieceLocation[1] - 1;
             interimBoard[i][tempJ] = piece;
             interimBoard[pi][pj] = '';
-            if (this.testForCheck(interimBoard, interimLocation)){
+            if (this.testForCheck(interimBoard, [i, tempJ])){
               check = true;
             }
           }

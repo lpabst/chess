@@ -2,9 +2,9 @@
 
 This is a chess game built using the React Framework
 
-Current State: Able to play the game like normal, but without castling or au passant. AI works but only chooses moves at random
+Current State: Able to play the game like normal, but without au passant. AI works but only picks its moves at random
 
-Next Step: Add in au passant and castling with the proper rules
+Next Step: Add in au passant 
     - Needs to be a stalemate when just king left on one side, and 50 moves are made
     - When pawn reaches last row, allow choice instead of forcing queen as replacement
 
