@@ -8,7 +8,7 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      playAs: 'Black',
+      playAs: 'White',
       player2: 'Computer',
       opponentAI: true,
       rotateBoard: 'No',
@@ -89,8 +89,8 @@ class Home extends Component {
         ['', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', ''],
-        ['bp', 'wp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
-        ['br', '', '', 'bk', '', '', '', 'br'],
+        ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+        ['br', 'bh', 'bb', 'bk', 'bq', 'bb', 'bh', 'br'],
       ],
       whoseTurn: 'w',
       allPiecesMoves: [],
@@ -480,11 +480,15 @@ class Home extends Component {
               check = true;
             }
             // one space away (can't castle through check) tempJ will be one space away from king's current location
+            console.log('testing interim location');
+            console.log([pi, pj])
             let interimBoard = JSON.parse(JSON.stringify(board));
-            let tempJ = mj > pj ? pieceLocation[1] + 1 : pieceLocation[1] - 1;
-            interimBoard[i][tempJ] = piece;
+            let tempJ = mj > pj ? pj + 1 : pj - 1;
+            interimBoard[pi][tempJ] = piece;
             interimBoard[pi][pj] = '';
-            if (this.testForCheck(interimBoard, [i, tempJ])){
+            console.log([pi, tempJ]);
+            if (this.testForCheck(interimBoard, [pi, tempJ])){
+              console.log('cannot castle through check');
               check = true;
             }
           }
