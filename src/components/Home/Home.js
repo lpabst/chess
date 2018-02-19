@@ -4,7 +4,6 @@ import './Home.css';
 import Square from './Square/Square.js';
 import Settings from './Settings/Settings.js';
 
-
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -35,10 +34,27 @@ class Home extends Component {
       warningMessage: '',
       errorPieceLocations: [],
       showSettings: false,
+      castling: {
+        white: {
+          kingHasMoved: false,
+          leftRookHasMoved: false,
+          rightRookHasMoved: false,
+        },
+        black: {
+          kingHasMoved: false,
+          leftRookHasMoved: false,
+          rightRookHasMoved: false,
+        }
+      },
+      whitePieces: 0,
+      blackPieces: 0,
+      stalemateMoveCount: 0,
     }
 
     this.startNewGame = this.startNewGame.bind(this);
     this.startTurn = this.startTurn.bind(this);
+    this.endGame = this.endGame.bind(this);
+    this.countEachPlayersPieces = this.countEachPlayersPieces.bind(this);
     this.getComputerMove = this.getComputerMove.bind(this);
     this.getAllAvailableMoves = this.getAllAvailableMoves.bind(this);
     this.selectPiece = this.selectPiece.bind(this);
@@ -85,7 +101,19 @@ class Home extends Component {
       warningMessage: '',
       errorPieceLocations: [],
       showSettings: false,
-    }, this.startTurn)
+      castling: {
+        white: {
+          kingHasMoved: false,
+          leftRookHasMoved: false,
+          rightRookHasMoved: false,
+        },
+        black: {
+          kingHasMoved: false,
+          leftRookHasMoved: false,
+          rightRookHasMoved: false,
+        }
+      },
+    }, this.startTurn);
   }
   
   /* 
@@ -96,28 +124,14 @@ class Home extends Component {
   */ 
   startTurn(){
     let allMoves = this.getAllAvailableMoves(null, null, true);
+    let {board} = this.state;
 
-    if (!allMoves.hasAvailableMoves){
+    this.countEachPlayersPieces(board);
 
-      // Check if it's stalemate or checkmate
-      let endGameMessage;
-      let {board} = this.state;
-      let kingLocation = this.getKingLocation(this.state.whoseTurn);
-      let isInCheck = this.testForCheck(board, kingLocation);
-
-      if (isInCheck){
-        let whoWon = this.state.whoseTurn === 'w' ? 'Black' : 'White';
-        endGameMessage = 'Checkmate!!! ' + whoWon + ' wins!';
-      }else{
-        endGameMessage = 'StaleMate! It\'s a tie game';
-      }
-
-      this.setState({
-        gameover: true,
-        warningMessage: endGameMessage,
-      })
-
-    }else{
+    if (!allMoves.hasAvailableMoves || this.state.stalemateMoveCount >= 50){
+      this.endGame(board);
+    }
+    else{
       // flip the board around on each turn if that setting is selected and it's not the beginning of the game
       let rotate = this.state.boardRotation;
       if (this.state.rotateBoard === 'Yes' && !this.state.firstTurn){
@@ -135,10 +149,48 @@ class Home extends Component {
           this.getComputerMove();
         }
       })
-  
-
     }
 
+  }
+
+  // ends the game
+  endGame(board){
+    // Check if it's stalemate or checkmate
+    let endGameMessage;
+    let kingLocation = this.getKingLocation(this.state.whoseTurn);
+    let isInCheck = this.testForCheck(board, kingLocation);
+
+    if (isInCheck){
+      let whoWon = this.state.whoseTurn === 'w' ? 'Black' : 'White';
+      endGameMessage = 'Checkmate!!! ' + whoWon + ' wins!';
+    }else{
+      endGameMessage = 'StaleMate! It\'s a tie game';
+    }
+
+    this.setState({
+      gameover: true,
+      warningMessage: endGameMessage,
+    })
+  }
+
+  // counts how many pieces each player has left and sets it on state
+  countEachPlayersPieces(board){
+    let whitePieces = 0;
+    let blackPieces = 0;
+
+    // Check how many pieces each player has left;
+    for (let row = 0; row < 8; row++){
+      for (let col = 0; col < 8; col++){
+        if (board[row][col] && board[row][col].charAt(0) === 'w'){
+          whitePieces++;
+        }
+        else if (board[row][col] && board[row][col].charAt(0) === 'b'){
+          blackPieces++;
+        }
+      }
+    }
+
+    this.setState({whitePieces, blackPieces})
   }
 
   // Makes a move for the computer player
@@ -162,6 +214,12 @@ class Home extends Component {
 
     // Carry out the random move
     let piece = board[i][j];
+
+    // if the computer moves a pawn to the last row, turn it into a queen
+    if (piece.charAt(1) === 'p' && (randomMove[0] === 0 || randomMove[0] === 7) ){
+      piece = piece.substring(0, 1) + 'q';
+    }
+
     board[randomMove[0]][randomMove[1]] = piece;
     board[i][j] = '';
     let newTurn = this.state.whoseTurn === 'b' ? 'w' : 'b';
@@ -361,6 +419,23 @@ class Home extends Component {
       checkValidMove(i+1, j+1, false, null, null);
       checkValidMove(i-1, j+1, false, null, null);
       checkValidMove(i+1, j-1, false, null, null);
+      // castling
+      let color = selectedPieceType.charAt(0) === 'w' ? 'white' : 'black';
+      // make sure the king hasn't moved
+      if (!this.state.castling[color].kingHasMoved){
+        // make sure the rook hasn't moved and there's no one in the way
+        if (!this.state.castling[color].leftRookHasMoved 
+          && board[i][j+1] === ''
+          && board[i][j+2] === ''
+          && board[i][j+3] === ''){
+            availableMoves.push([i, j+2]);
+        }
+        if (!this.state.castling[color].rightRookHasMoved
+          && board[i][j-1] === ''
+          && board[i][j-2] === ''){
+            availableMoves.push([i, j-2]);
+        }
+      }
     }
 
     // Limit the moves for this piece to avoid illegal moves that result in your own check
@@ -376,6 +451,9 @@ class Home extends Component {
     let board = this.state.board;
     let currentPlayerColor = this.state.whoseTurn;
     let kingLocation = this.getKingLocation(currentPlayerColor);
+    let pi = pieceLocation[0];
+    let pj = pieceLocation[1];
+    let piece = board[pi][pj];
 
     // for each available move in the array, move the piece there, then check for check. 
     // If we're in check after that move, then it's not a legal move, so remove it from the array.
@@ -383,18 +461,44 @@ class Home extends Component {
       let testBoard = JSON.parse(JSON.stringify(board));
       let mi = moves[i][0];
       let mj = moves[i][1];
-      let pi = pieceLocation[0];
-      let pj = pieceLocation[1];
-      let piece = testBoard[pi][pj];
       testBoard[mi][mj] = piece;
       testBoard[pi][pj] = '';
+      let check = false;
 
-      // if they moved the king, make sure to update the king's location before testing for check
+      // Special rules for the king's moves
       if (piece.charAt(1) === 'k'){
+        // update the king location before testing for check
         kingLocation = [mi, mj];
+        check = this.testForCheck(testBoard, kingLocation);
+
+        if (!check){
+          // If the spot we're moving to does not put us in check, we have
+          // some additional things to check for 'castling' situations
+          if (mj === pj - 2 || mj === pj + 2){
+            // test current location (can't castle when in check)
+            if (this.testForCheck(board, pieceLocation)){
+              check = true;
+            }
+            // one space away (can't castle through check) tempJ will be one space away from king's current location
+            console.log('testing interim location');
+            console.log([pi, pj])
+            let interimBoard = JSON.parse(JSON.stringify(board));
+            let tempJ = mj > pj ? pj + 1 : pj - 1;
+            interimBoard[pi][tempJ] = piece;
+            interimBoard[pi][pj] = '';
+            console.log([pi, tempJ]);
+            if (this.testForCheck(interimBoard, [pi, tempJ])){
+              console.log('cannot castle through check');
+              check = true;
+            }
+          }
+        }
+      }
+      // if we aren't moving the king, still test for check
+      else{
+        check = this.testForCheck(testBoard, kingLocation);
       }
 
-      let check = this.testForCheck(testBoard, kingLocation);
       if (check){
         moves.splice(i, 1);
       }
@@ -429,12 +533,28 @@ class Home extends Component {
     let pieceType = this.state.selectedPieceType;
 
     // If a pawn advanced to the end of the board, allow a new piece to be chosen as replacement
-    if ( (i === 0 || i === 7) && this.state.selectedPieceType.charAt(1) === 'p'){
+    if ( (i === 0 || i === 7) && pieceType.charAt(1) === 'p'){
       pieceType = pieceType.substring(0,1) + 'q';
+    }
+
+    // If they "castle" move their king AND their castle simultaneously
+    if (pieceType.charAt(1) === 'k' && j === oldLocation[1] - 2){
+      board[oldLocation[0]][oldLocation[1]-1] = pieceType.substring(0, 1) + 'r';
+      board[oldLocation[0]][oldLocation[1]-3] = '';
+    }
+    if (pieceType.charAt(1) === 'k' && j === oldLocation[1] + 2){
+      board[oldLocation[0]][oldLocation[1]+1] = pieceType.substring(0, 1) + 'r';
+      board[oldLocation[0]][oldLocation[1]+4] = '';
     }
 
     board[i][j] = pieceType;
     board[oldLocation[0]][oldLocation[1]] = '';
+
+    // if either player has only their king left, update the move count
+    let stalemateMoveCount = this.state.stalemateMoveCount
+    if (this.state.blackPieces === 1 || this.state.whitePieces === 1){
+      stalemateMoveCount ++;
+    }
 
     this.setState({
       pieceSelected: false,
@@ -444,8 +564,28 @@ class Home extends Component {
       whoseTurn: newTurn,
       availableMoves: [],
       firstTurn: false,
+      stalemateMoveCount: stalemateMoveCount,
     }, () => {
-      this.startTurn()
+
+      // If they move their king or a castle, keep track of that to limit the ability to 'castle' in the future
+      let castling = this.state.castling;
+      let color = pieceType.charAt(0) === 'b' ? 'black' : 'white';
+
+      if (pieceType.charAt(1) === 'k'){
+        castling[color].kingHasMoved = true;
+      }
+      if (pieceType.charAt(1) === 'r'){
+        if (oldLocation[1] === 0){
+          castling[color].rightRookHasMoved = true;
+        }
+        if (oldLocation[1] === 7){
+          castling[color].leftRookHasMoved = true;
+        }
+      }
+
+      // update the castling object, then start the new turn
+      this.setState({castling}, this.startTurn);
+
     }) 
   }
 
@@ -463,14 +603,27 @@ class Home extends Component {
     }
 
     let {board, availableMoves} = this.state;
+
     // if there's no piece selected and the user clicked on a piece of their own color, set that piece to the selectedPiece, and get the available moves for that piece
     if (!this.state.pieceSelected && board[i][j] && board[i][j].charAt(0) === this.state.whoseTurn) {
       this.selectPiece(i, j);
     }
+
+    // If the user clicks on the piece that is already the active piece, unactivate it
+    else if (this.state.pieceSelected && this.state.selectedPieceLocation[0] === i && this.state.selectedPieceLocation[1] === j){
+      this.setState({
+        pieceSelected: false,
+        selectedPieceType: '',
+        selectedPieceLocation: [], 
+        availableMoves: [],
+      })
+    }
+
     // if there IS a piece selected, but the user clicks on a different piece of their own color, set the selected piece to the new selection
     else if (this.state.pieceSelected && board[i][j].charAt(0) === this.state.selectedPieceType.charAt(0)) {
       this.selectPiece(i, j);
     }
+    
     // If there is a piece selected and they didn't click on another of their own pieces
     else if (this.state.pieceSelected){
       // Check to see if the square the user clicked on is a valid move for the piece that was selected. If so, move it to that new spot.
@@ -482,18 +635,22 @@ class Home extends Component {
     }
   }
 
+  // opens/closes the settings modal, opposite of what it is now
   toggleSettings(){
     this.setState({
       showSettings: !this.state.showSettings
     })
   }
 
+  // closes the settings modal
   closeSettings(){
     this.setState({
       showSettings: false
     })
   }
 
+  // this is passed to settings component as a prop so that it can update state on Home. If the
+  // settings modal updates player2, updates the opponentAI setting as well
   updateState(e, target){
     this.setState({
       [target]: e.target.value,
