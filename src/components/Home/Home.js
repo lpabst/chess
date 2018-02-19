@@ -9,6 +9,8 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      playAs: 'White',
+      player2: 'Human',
       gameover: false,
       board: [
         ['wr', 'wh', 'wb', 'wk', 'wq', 'wb', 'wh', 'wr'],
@@ -28,7 +30,6 @@ class Home extends Component {
       availableMoves: [],
       warningMessage: '',
       errorPieceLocations: [],
-      endGameMessage: '',
       showSettings: true,
     }
 
@@ -44,6 +45,7 @@ class Home extends Component {
     this.toggleSettings = this.toggleSettings.bind(this);
     this.closeSettings = this.closeSettings.bind(this);
     this.renderBoard = this.renderBoard.bind(this);
+    this.updateState = this.updateState.bind(this);
     
   }
 
@@ -73,7 +75,7 @@ class Home extends Component {
       availableMoves: [],
       warningMessage: '',
       errorPieceLocations: [],
-      endGameMessage: '',
+      showSettings: false,
     }, this.startTurn)
   }
   
@@ -97,7 +99,7 @@ class Home extends Component {
 
       this.setState({
         gameover: true,
-        endGameMessage: endGameMessage,
+        warningMessage: endGameMessage,
       })
 
     }else{
@@ -398,8 +400,16 @@ class Home extends Component {
   }
 
   closeSettings(){
+    console.log('closing settings');
     this.setState({
       showSettings: false
+    }, console.log('done'))
+    console.log('sync done');
+  }
+
+  updateState(e, target){
+    this.setState({
+      [target]: e.target.value
     })
   }
 
@@ -430,8 +440,13 @@ class Home extends Component {
           {this.renderBoard()}
         </div>
 
-        { this.state.showSettings || this.state.gameover ? 
-            <Settings closeSettings={this.closeSettings} startNewGame={this.startNewGame} />
+        { this.state.showSettings ? 
+            <Settings 
+            closeSettings={this.closeSettings} 
+            startNewGame={this.startNewGame} 
+            updateState={this.updateState}
+            playAs={this.state.playAs}
+            player2={this.state.player2} />
           : null
         }
 
