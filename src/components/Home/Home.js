@@ -48,7 +48,7 @@ class Home extends Component {
       },
       whitePieces: 0,
       blackPieces: 0,
-      stalemateKingMoveCount: 0,
+      stalemateMoveCount: 0,
     }
 
     this.startNewGame = this.startNewGame.bind(this);
@@ -89,8 +89,8 @@ class Home extends Component {
         ['', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', ''],
-        ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
-        ['br', 'bh', 'bb', 'bk', 'bq', 'bb', 'bh', 'br'],
+        ['bp', 'wp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+        ['br', '', '', 'bk', '', '', '', 'br'],
       ],
       whoseTurn: 'w',
       allPiecesMoves: [],
@@ -128,7 +128,7 @@ class Home extends Component {
 
     this.countEachPlayersPieces(board);
 
-    if (!allMoves.hasAvailableMoves){
+    if (!allMoves.hasAvailableMoves || this.state.stalemateMoveCount >= 50){
       this.endGame(board);
     }
     else{
@@ -546,6 +546,12 @@ class Home extends Component {
     board[i][j] = pieceType;
     board[oldLocation[0]][oldLocation[1]] = '';
 
+    // if either player has only their king left, update the move count
+    let stalemateMoveCount = this.state.stalemateMoveCount
+    if (this.state.blackPieces === 1 || this.state.whitePieces === 1){
+      stalemateMoveCount ++;
+    }
+
     this.setState({
       pieceSelected: false,
       selectedPieceType: '',
@@ -554,6 +560,7 @@ class Home extends Component {
       whoseTurn: newTurn,
       availableMoves: [],
       firstTurn: false,
+      stalemateMoveCount: stalemateMoveCount,
     }, () => {
 
       // If they move their king or a castle, keep track of that to limit the ability to 'castle' in the future
