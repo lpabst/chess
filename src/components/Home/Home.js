@@ -603,14 +603,27 @@ class Home extends Component {
     }
 
     let {board, availableMoves} = this.state;
+
     // if there's no piece selected and the user clicked on a piece of their own color, set that piece to the selectedPiece, and get the available moves for that piece
     if (!this.state.pieceSelected && board[i][j] && board[i][j].charAt(0) === this.state.whoseTurn) {
       this.selectPiece(i, j);
     }
+
+    // If the user clicks on the piece that is already the active piece, unactivate it
+    else if (this.state.pieceSelected && this.state.selectedPieceLocation[0] === i && this.state.selectedPieceLocation[1] === j){
+      this.setState({
+        pieceSelected: false,
+        selectedPieceType: '',
+        selectedPieceLocation: [], 
+        availableMoves: [],
+      })
+    }
+
     // if there IS a piece selected, but the user clicks on a different piece of their own color, set the selected piece to the new selection
     else if (this.state.pieceSelected && board[i][j].charAt(0) === this.state.selectedPieceType.charAt(0)) {
       this.selectPiece(i, j);
     }
+    
     // If there is a piece selected and they didn't click on another of their own pieces
     else if (this.state.pieceSelected){
       // Check to see if the square the user clicked on is a valid move for the piece that was selected. If so, move it to that new spot.
