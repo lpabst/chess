@@ -11,6 +11,7 @@ class Home extends Component {
     this.state = {
       playAs: 'White',
       player2: 'Human',
+      boardRotation: 180,
       gameover: false,
       board: [
         ['wr', 'wh', 'wb', 'wk', 'wq', 'wb', 'wh', 'wr'],
@@ -50,13 +51,16 @@ class Home extends Component {
   }
 
   componentDidMount(){
-    this.startTurn();
+    this.startNewGame();
   }
 
   // Resets state and starts a new game
   startNewGame(){
+    let rotate = this.state.playAs === 'White' ? 0 : 180;
+
     this.setState({
       gameover: false,
+      boardRotation: rotate,
       board: [
         ['wr', 'wh', 'wb', 'wk', 'wq', 'wb', 'wh', 'wr'],
         ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
@@ -103,9 +107,13 @@ class Home extends Component {
       })
 
     }else{
+      // flip the board around on each turn
+      let rotate = this.state.boardRotation === 180 ? 0 : 180;
+
       // allow the user to click a piece and make a move
       this.setState({
         allPiecesMoves: allMoves,
+        boardRotation: rotate
       })
     }
 
@@ -414,9 +422,12 @@ class Home extends Component {
   }
 
   renderBoard() {
+    let rotate = 'rotate(' + this.state.boardRotation + 'deg)'
+
     return this.state.board.map((row, i) => {
       var squares = row.map((item, j) => {
         return <Square key={j}
+          rotate={rotate} 
           piece={item}
           handleClick={this.clickSquare}
           location={[i, j]}
@@ -429,6 +440,8 @@ class Home extends Component {
   }
 
   render() {
+    let rotate = 'rotate(' + this.state.boardRotation + 'deg)'
+
     return (
       <div className="home">
 
@@ -436,7 +449,7 @@ class Home extends Component {
         <p className='warning' >{this.state.warningMessage}</p>
         <button onClick={this.toggleSettings} className='settings_toggle' >New Game</button>
 
-        <div className='board'>
+        <div className='board' style={{transform: rotate}}>
           {this.renderBoard()}
         </div>
 
