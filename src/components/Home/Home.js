@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './Home.css';
 
 import Square from './Square/Square.js';
+import Settings from './Settings/Settings.js';
 
 
 class Home extends Component {
@@ -423,50 +424,14 @@ class Home extends Component {
 
         <p className='turn'>{this.state.whoseTurn === 'w' ? 'White\'s turn' : "Black's turn"}</p>
         <p className='warning' >{this.state.warningMessage}</p>
-        <button onClick={this.toggleSettings} className='settings_toggle' >Settings</button>
+        <button onClick={this.toggleSettings} className='settings_toggle' >New Game</button>
 
         <div className='board'>
           {this.renderBoard()}
         </div>
 
-        { this.state.gameover ? 
-            <div className='gameover_div'>
-              <p className='endgame_message'>{this.state.endGameMessage}</p>
-              <button className='start_over' onClick={this.startNewGame} >Start Over</button>
-            </div>
-          : null
-        }
-
-        { this.state.showSettings ? 
-            <div className='settings_div'>
-
-              <p className='close_x' onClick={this.closeSettings} >X</p>
-
-              <div className='setting_row'>
-                <p>Settings</p>
-              </div>
-
-              <div className='setting_row'>
-                <p>Play as </p>
-                <select>
-                  <option>Black</option>
-                  <option>White</option>
-                </select>
-              </div>
-
-              <div className='setting_row'>
-                <p>Player 2</p>
-                <select>
-                  <option>Computer</option>
-                  <option>Human</option>
-                </select>
-              </div>
-
-              <div className='setting_row'>
-                <button onClick={this.startNewGame} >Start New Game</button>
-              </div>
-
-            </div>
+        { this.state.showSettings || this.state.gameover ? 
+            <Settings closeSettings={this.closeSettings} startNewGame={this.startNewGame} />
           : null
         }
 
