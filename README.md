@@ -4,9 +4,10 @@ This is a chess game built using the React Framework
 
 Current State: Able to play the game like normal, but without castling or au passant.
 
-Next Step: finish settings modal so that it works and updates the new game mode. 
-    - Then add in au passant and castling with the proper rules
-    - Then add in an AI to play player 2!
+Next Step: Add in au passant and castling with the proper rules
+    - Needs to be a stalemate when just king left on one side, and 50 moves are made
+    - Then add in an AI to play player 2 when computer opponent is selected!
+    - When pawn reaches last row, allow choice instead of forcing queen as replacement
 
 
 algorithm overview

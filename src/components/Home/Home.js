@@ -10,8 +10,9 @@ class Home extends Component {
     super(props);
     this.state = {
       playAs: 'White',
-      player2: 'Human',
-      rotateBoard: 'Yes',
+      player2: 'Computer',
+      opponentAI: true,
+      rotateBoard: 'No',
       boardRotation: 180,
       firstTurn: true,
       gameover: false,
@@ -33,11 +34,12 @@ class Home extends Component {
       availableMoves: [],
       warningMessage: '',
       errorPieceLocations: [],
-      showSettings: true,
+      showSettings: false,
     }
 
     this.startNewGame = this.startNewGame.bind(this);
     this.startTurn = this.startTurn.bind(this);
+    this.getComputerMove = this.getComputerMove.bind(this);
     this.getAllAvailableMoves = this.getAllAvailableMoves.bind(this);
     this.selectPiece = this.selectPiece.bind(this);
     this.getAvailableMoves = this.getAvailableMoves.bind(this);
@@ -101,7 +103,7 @@ class Home extends Component {
         let whoWon = this.state.whoseTurn === 'w' ? 'Black' : 'White';
         endGameMessage = 'Checkmate!!! ' + whoWon + ' wins!';
       }else{
-        endGameMessage = 'StaleMate! It\'s a tie';
+        endGameMessage = 'StaleMate! It\'s a tie game';
       }
 
       this.setState({
@@ -110,18 +112,68 @@ class Home extends Component {
       })
 
     }else{
-      // flip the board around on each turn
+      // flip the board around on each turn if that setting is selected and it's not the beginning of the game
       let rotate = this.state.boardRotation;
       if (this.state.rotateBoard === 'Yes' && !this.state.firstTurn){
         rotate = rotate === 0 ? 180 : 0;
       }
-
-      // allow the user to click a piece and make a move
+      
+      // Set all of the available moves on state, and rotate board if necessary
       this.setState({
         allPiecesMoves: allMoves,
         boardRotation: rotate
+      }, () => {
+        // If the opponent is the computer and it's the computer's turn, get the computer's move here
+        let player1 = this.state.playAs === 'White' ? 'w' : 'b';
+        if (this.state.opponentAI && player1 !== this.state.whoseTurn){
+          this.getComputerMove();
+        }
       })
+  
+
     }
+
+  }
+
+  getComputerMove(){
+    let moves = this.state.allPiecesMoves.moves;
+    let {board} = this.state;
+    let searching = true;
+    let randomMove;
+    let i, j;
+
+    while(searching){
+      i = Math.floor(Math.random() * 8);
+      j = Math.floor(Math.random() * 8);
+      // Pick a random spot on the board. If that piece has available moves, pick one at random
+      if (moves[i][j].length > 0){
+        searching = false;
+        let r = Math.floor(Math.random() * moves[i][j].length);
+        randomMove = moves[i][j][r];
+      }
+    }
+
+    // Carry out the random move
+    let piece = board[i][j];
+    board[randomMove[0]][randomMove[1]] = piece;
+    board[i][j] = '';
+    let newTurn = this.state.whoseTurn === 'b' ? 'w' : 'b';
+
+    // Wait for a short time, then make the random move and start the user's turn again
+    setTimeout(() => {
+      this.setState({
+        board: board,
+        pieceSelected: false,
+        selectedPieceType: '',
+        selectedPieceLocation: [],
+        board: board,
+        whoseTurn: newTurn,
+        availableMoves: [],
+        firstTurn: false,
+      }, () => {
+        this.startTurn()
+      }) 
+    }, 250);
 
   }
 
@@ -392,8 +444,14 @@ class Home extends Component {
 
   // Determines what happens when you click on a square on the board
   clickSquare(i, j) {
-    // if the game is over, nothing happens
+    // If the game is over, nothing happens
     if (this.state.gameover){
+      return;
+    }
+
+    // If the computer is making a move, nothing happens
+    let player1 = this.state.playAs === 'White' ? 'w' : 'b';
+    if (this.state.opponentAI && player1 !== this.state.whoseTurn){
       return;
     }
 
@@ -424,17 +482,21 @@ class Home extends Component {
   }
 
   closeSettings(){
-    console.log('closing settings');
     this.setState({
       showSettings: false
-    }, console.log('done'))
-    console.log('sync done');
+    })
   }
 
   updateState(e, target){
     this.setState({
-      [target]: e.target.value
+      [target]: e.target.value,
     })
+
+    // If user is updating the player2 setting, update the opponentAI setting as well
+    if (target === 'player2'){
+      let opponentAI = (e.target.value === 'Computer') ? true : false;
+      this.setState({opponentAI});
+    }
   }
 
   renderBoard() {
@@ -485,58 +547,4 @@ class Home extends Component {
   }
 }
 
-
 export default Home;
-
-
-
-/*
-    // Checks the location of the current player's king against available moves for each opponent piece 
-    let restulsInCheck = false;
-    let offendingPieces = [];
-    let availableMoves = [];
-
-    for (let i = 0; i < 8; i++){
-      for (let j = 0; j < 8; j++){
-        // For every sqaure, if it's not a king, and it's an opponent piece, get its available moves, and see if any of them are the same
-        // as the current player's king's position. If so, mark that as an 'offending piece' and set resultsInCheck to true
-        if (board[i][j] !== '' && board[i][j].charAt(0) !== currentPlayerColor && board[i][j] !== 'wk' && board[i][j] !== 'bk'){
-          let availableMovesForOpponentPiece = this.getAvailableMoves(board, board[i][j], [i, j]);
-          for (let k = 0; k < availableMovesForOpponentPiece.length; k++){
-            // go through the entire array of available moves for each opponent piece and check against current player's king's location
-            if (availableMovesForOpponentPiece[k][0] === kingLocation[0] && availableMovesForOpponentPiece[k][1] === kingLocation[1]){
-              restulsInCheck = true;
-              offendingPieces.push([i, j]);
-              console.log(offendingPieces)
-            }
-          }
-        }
-      }
-    }
-
-    // By now we know which pieces would put the king in check if the currently selected piece were to move. If there's
-    // only one offending piece, and our currently selected piece can kill it, that is the only available move for our
-    // currently selected piece. If there are more than one offending pieces, no available moves exist for our currently
-    // selected piece!
-    if (restulsInCheck){
-      console.log(offendingPieces);
-      if (offendingPieces.length === 1){
-        for (let m = 0; m < this.state.availableMoves.length; m++){
-          if (this.state.availableMoves[m][0] === offendingPieces[0][0] && this.state.availableMoves[m][1] === offendingPieces[0][1]){
-            console.log(availableMoves)
-            availableMoves = offendingPieces[0];
-            console.log(availableMoves)
-          }
-        }
-      }else{
-        console.log(offendingPieces.length)
-      }
-
-      this.setState({
-        availableMoves: availableMoves,
-        warningMessage: 'Moving this piece would put you in check',
-        errorPieceLocations: offendingPieces
-      })
-
-    }
-*/
