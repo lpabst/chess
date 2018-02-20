@@ -3,6 +3,8 @@ import './Home.css';
 
 import Square from './Square/Square.js';
 
+import ai from './../../services/chessEngine.js';
+
 
 class Home extends Component {
   constructor(props) {
