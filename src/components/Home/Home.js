@@ -4,6 +4,8 @@ import './Home.css';
 import Square from './Square/Square.js';
 import Settings from './Settings/Settings.js';
 
+import ai from './../../services/chessEngine.js';
+
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -11,6 +13,7 @@ class Home extends Component {
       playAs: 'White',
       player2: 'Computer',
       opponentAI: true,
+      aiDifficulty: 0,
       rotateBoard: 'No',
       boardRotation: 180,
       firstTurn: true,
@@ -195,34 +198,13 @@ class Home extends Component {
 
   // Makes a move for the computer player
   getComputerMove(){
-    let moves = this.state.allPiecesMoves.moves;
     let {board} = this.state;
-    let searching = true;
-    let randomMove;
-    let i, j;
-
-    while(searching){
-      i = Math.floor(Math.random() * 8);
-      j = Math.floor(Math.random() * 8);
-      // Pick a random spot on the board. If that piece has available moves, pick one at random
-      if (moves[i][j].length > 0){
-        searching = false;
-        let r = Math.floor(Math.random() * moves[i][j].length);
-        randomMove = moves[i][j][r];
-      }
-    }
-
-    // Carry out the random move
-    let piece = board[i][j];
-
-    // if the computer moves a pawn to the last row, turn it into a queen
-    if (piece.charAt(1) === 'p' && (randomMove[0] === 0 || randomMove[0] === 7) ){
-      piece = piece.substring(0, 1) + 'q';
-    }
-
-    board[randomMove[0]][randomMove[1]] = piece;
-    board[i][j] = '';
+    let moves = this.state.allPiecesMoves.moves;
     let newTurn = this.state.whoseTurn === 'b' ? 'w' : 'b';
+    let aiDifficulty = this.state.aiDifficulty
+
+    // computer chess engine is outsourced to src/services/chessEngine.js and is imported as "ai"
+    board = ai.getComputerMove(aiDifficulty, board, moves);
 
     // Wait for a short time, then make the random move and start the user's turn again
     setTimeout(() => {
@@ -231,7 +213,6 @@ class Home extends Component {
         pieceSelected: false,
         selectedPieceType: '',
         selectedPieceLocation: [],
-        board: board,
         whoseTurn: newTurn,
         availableMoves: [],
         firstTurn: false,
