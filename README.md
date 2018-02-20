@@ -2,7 +2,28 @@
 
 This is a chess game built using the React Framework
 
-Current State: Able to move pieces in a turn based fashion. Piece movement is controlled by normal Chess rules. Placing yourself in check is no longer allowed, see below for exception
-Next Step: moving the piece that would put you in check should be allowed if it kills the offending piece!
+Current State: Able to play the game like normal, but without au passant. AI works but only picks its moves at random
 
-**selecting piece that should be able to kill offending piece nothing happens...
+Future Steps: 
+    - Upgrade AI
+    - Alert user when they are put in check
+    - Add in au passant 
+    - When pawn reaches last row, allow choice instead of forcing queen as replacement
+
+
+General algorithm overview
+- start turn
+    - check all available moves
+        - filter by legal moves (take check into account)
+        - Save available/legal moves to state for future reference
+    - if no available/legal moves, game over
+        - if in check, checkmate
+        - else, stalemate
+    - else, allow user interaction
+        - user clicks on piece
+            - get available moves from state and set activePiece on state
+                - Display available moves in blue highlight
+            - if user clicks on an available move for the activePiece, move the piece to that location *END TURN*
+            - if user clicks on the piece that is already active, remove it from being the active piece
+            - else if user clicks on a different piece of theirs, update the activePiece to the new piece, and update the availble moves accordingly.
+            - else if user clicks somewhere else, do nothing
