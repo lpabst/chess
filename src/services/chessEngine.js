@@ -39,6 +39,51 @@ module.exports = {
     },
 
     anotherFunction: function(board, moves){
+        const points = {
+            'q': 8,
+            'r': 5,
+            'b': 3.2,
+            'h': 3,
+            'p': 1
+        }
         // build a chess engine here
-    }
+        let movePoints;
+        let pieceToMove;
+        let oldLocation;
+        let newLocation;
+
+        for (let i = 0; i < 8; i++){
+            for (let j = 0; j < 8; j++){
+                let arr = moves[i][j];
+                for (let k = 0; k < arr.length; k++){
+                    let killPiece = board[arr[k][0]][arr[k][1]];
+                    if (!movePoints){
+                        movePoints = killPiece ? points[killPiece.charAt(1)] : 0;
+                        pieceToMove = board[i][j];
+                        oldLocation = [i, j];
+                        newLocation = arr[k];
+                    }
+                    else if (killPiece){
+                        let pieceType = killPiece.charAt(1);
+                        if (points[pieceType] > movePoints){
+                            movePoints = points[pieceType];
+                            pieceToMove = board[i][j];
+                            oldLocation = [i, j];
+                            newLocation = arr[k];
+                        }
+                    }
+                }
+            }
+        }
+
+        if (movePoints === 0){
+            return this.pickRandomMove(board, moves);
+        }
+
+        board[newLocation[0]][newLocation[1]] = pieceToMove;
+        board[oldLocation[0]][oldLocation[1]] = '';
+
+        return board;
+    },
+
 }

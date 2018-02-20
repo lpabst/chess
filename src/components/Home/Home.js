@@ -14,6 +14,7 @@ class Home extends Component {
       player2: 'Computer',
       opponentAI: true,
       aiDifficulty: 0,
+      aiPlayer: 'Jack The Monkey',
       rotateBoard: 'No',
       boardRotation: 180,
       firstTurn: true,
@@ -198,10 +199,9 @@ class Home extends Component {
 
   // Makes a move for the computer player
   getComputerMove(){
-    let {board} = this.state;
+    let {board, aiDifficulty} = this.state;
     let moves = this.state.allPiecesMoves.moves;
     let newTurn = this.state.whoseTurn === 'b' ? 'w' : 'b';
-    let aiDifficulty = this.state.aiDifficulty
 
     // computer chess engine is outsourced to src/services/chessEngine.js and is imported as "ai"
     board = ai.getComputerMove(aiDifficulty, board, moves);
@@ -632,14 +632,14 @@ class Home extends Component {
 
   // this is passed to settings component as a prop so that it can update state on Home. If the
   // settings modal updates player2, updates the opponentAI setting as well
-  updateState(e, target){
+  updateState(newVal, target){
     this.setState({
-      [target]: e.target.value,
+      [target]: newVal,
     })
 
     // If user is updating the player2 setting, update the opponentAI setting as well
     if (target === 'player2'){
-      let opponentAI = (e.target.value === 'Computer') ? true : false;
+      let opponentAI = (newVal === 'Computer') ? true : false;
       this.setState({opponentAI});
     }
   }
@@ -683,7 +683,8 @@ class Home extends Component {
             updateState={this.updateState}
             playAs={this.state.playAs}
             player2={this.state.player2}
-            rotateBoard={this.state.rotateBoard} />
+            rotateBoard={this.state.rotateBoard}
+            aiDifficulty={this.state.aiDifficulty} />
           : null
         }
 
