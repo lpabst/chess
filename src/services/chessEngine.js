@@ -4,8 +4,22 @@ module.exports = {
             return this.pickRandomMove(board, moves);
         }
         else if (level === 1){
-            return this.anotherFunction(board, moves);
+            return this.aggressiveMike(board, moves);
         }
+    },
+
+    testForCheck: function(board, kingLocation, opponentsMoves){
+        for (let c = 0; c < 8; c++){
+          for (let d = 0; d < 8; d++){
+            let arr = opponentsMoves[c][d];
+            for (let k = 0; k < arr.length; k++){
+              if (arr[k][0] === kingLocation[0] && arr[k][1] === kingLocation[1]){
+                return true;
+              }
+            }
+          }
+        }
+        return false;
     },
 
     pickRandomMove: function(board, moves){
@@ -38,7 +52,7 @@ module.exports = {
         return board;
     },
 
-    anotherFunction: function(board, moves){
+    aggressiveMike: function(board, moves){
         const points = {
             'q': 8,
             'r': 5,

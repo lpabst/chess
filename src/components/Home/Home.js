@@ -206,6 +206,12 @@ class Home extends Component {
     // computer chess engine is outsourced to src/services/chessEngine.js and is imported as "ai"
     board = ai.getComputerMove(aiDifficulty, board, moves);
 
+    // if either player has only their king left, update the move count
+    let stalemateMoveCount = this.state.stalemateMoveCount
+    if (this.state.blackPieces === 1 || this.state.whitePieces === 1){
+      stalemateMoveCount ++;
+    }
+
     // Wait for a short time, then make the random move and start the user's turn again
     setTimeout(() => {
       this.setState({
@@ -216,6 +222,7 @@ class Home extends Component {
         whoseTurn: newTurn,
         availableMoves: [],
         firstTurn: false,
+        stalemateMoveCount: stalemateMoveCount,
       }, () => {
         this.startTurn()
       }) 
@@ -461,15 +468,11 @@ class Home extends Component {
               check = true;
             }
             // one space away (can't castle through check) tempJ will be one space away from king's current location
-            console.log('testing interim location');
-            console.log([pi, pj])
             let interimBoard = JSON.parse(JSON.stringify(board));
             let tempJ = mj > pj ? pj + 1 : pj - 1;
             interimBoard[pi][tempJ] = piece;
             interimBoard[pi][pj] = '';
-            console.log([pi, tempJ]);
             if (this.testForCheck(interimBoard, [pi, tempJ])){
-              console.log('cannot castle through check');
               check = true;
             }
           }
