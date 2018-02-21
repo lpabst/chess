@@ -204,29 +204,8 @@ class Home extends Component {
     let newTurn = whoseTurn === 'b' ? 'w' : 'b';
 
     // computer chess engine is outsourced to src/services/chessEngine.js and is imported as "ai"
-    board = ai.getComputerMove(aiDifficulty, board, moves, whoseTurn);
-
-    // if either player has only their king left, update the move count
-    let stalemateMoveCount = this.state.stalemateMoveCount
-    if (this.state.blackPieces === 1 || this.state.whitePieces === 1){
-      stalemateMoveCount ++;
-    }
-
-    // Wait for a short time, then make the random move and start the user's turn again
-    setTimeout(() => {
-      this.setState({
-        board: board,
-        pieceSelected: false,
-        selectedPieceType: '',
-        selectedPieceLocation: [],
-        whoseTurn: newTurn,
-        availableMoves: [],
-        firstTurn: false,
-        stalemateMoveCount: stalemateMoveCount,
-      }, () => {
-        this.startTurn()
-      }) 
-    }, 250);
+    // We use .call() here to allow for the chessEngine functions to update state and stuff
+    ai.getComputerMove.call(this, aiDifficulty, board, moves, whoseTurn, newTurn);
 
   }
 
