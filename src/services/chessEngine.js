@@ -1,8 +1,6 @@
 const axios = require('axios');
 
 function updateBoardOnState(board, newTurn){
-    console.log(this);
-    console.log(this.state);
 
     // if either player has only their king left, update the move count
     let stalemateMoveCount = this.state.stalemateMoveCount
@@ -61,8 +59,6 @@ function getFen(board, whoseTurn){
 }
 
 function pickRandomMove(board, moves, whoseTurn, newTurn){
-    console.log(this);
-    console.log(this.state);
     let searching = true;
     let randomMove;
     let i, j;
@@ -89,7 +85,9 @@ function pickRandomMove(board, moves, whoseTurn, newTurn){
     board[randomMove[0]][randomMove[1]] = piece;
     board[i][j] = '';
 
-    return updateBoardOnState.call(this, board, newTurn);
+    setTimeout(() => {
+        updateBoardOnState.call(this, board, newTurn);
+    }, 250);
 }
 
 function aggressiveMike(board, moves, whoseTurn, newTurn){
@@ -137,7 +135,9 @@ function aggressiveMike(board, moves, whoseTurn, newTurn){
     board[newLocation[0]][newLocation[1]] = pieceToMove;
     board[oldLocation[0]][oldLocation[1]] = '';
 
-    return updateBoardOnState.call(this, board, newTurn);
+    setTimeout(() => {
+        updateBoardOnState.call(this, board, newTurn);
+    }, 250);
 }
 
 function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
@@ -161,6 +161,7 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
     })
     .then( response => {
         if (response.data.match(/bestmove/)){
+        /******************** I HAVE THE WRONG LOGIC HERE FOR CHESS d5f5 doesn't mean move d5 to f5... **********************/
             // if we get a bestmove back, make that move here
             let move = response.data.match(/bestmove (.*) bestmove/)[1];
             move = move.split('');
@@ -177,18 +178,22 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
             board[mi][mj] = piece;
             board[pi][pj] = '';
 
+            console.log(board);
             board = flipBoard(board);
             
             return updateBoardOnState.call(this, board, newTurn);
+        /****************** NEED TO FIX THE CODE ABOVE *********************/
         }else{
             // if no bestmove data was returned, pick a random move
             board = flipBoard(board);
+            console.log('random move');
             return pickRandomMove.call(this, board, moves, whoseTurn, newTurn);
         }
     })
     .catch( err => {
         // if it errors out, pick a random move
         board = flipBoard(board);
+        console.log('random move');
         return pickRandomMove.call(this, board, moves, whoseTurn, newTurn);
     })
 
