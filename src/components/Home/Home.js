@@ -199,12 +199,12 @@ class Home extends Component {
 
   // Makes a move for the computer player
   getComputerMove(){
-    let {board, aiDifficulty} = this.state;
+    let {board, aiDifficulty, whoseTurn} = this.state;
     let moves = this.state.allPiecesMoves.moves;
-    let newTurn = this.state.whoseTurn === 'b' ? 'w' : 'b';
+    let newTurn = whoseTurn === 'b' ? 'w' : 'b';
 
     // computer chess engine is outsourced to src/services/chessEngine.js and is imported as "ai"
-    board = ai.getComputerMove(aiDifficulty, board, moves);
+    board = ai.getComputerMove(aiDifficulty, board, moves, whoseTurn);
 
     // if either player has only their king left, update the move count
     let stalemateMoveCount = this.state.stalemateMoveCount

@@ -16,6 +16,7 @@ class Settings extends Component {
     const difficulty = {
       'Jack The Monkey': 0,
       'Aggressive Mike': 1,
+      'Thoughtful Sue': 2,
     }
     var diff = difficulty[newVal];
     
@@ -63,6 +64,7 @@ class Settings extends Component {
               <select value={this.props.aiPlayer} onChange={(e) => this.updateDifficulty(e.target.value)} >
                 <option>Jack The Monkey</option>
                 <option>Aggressive Mike</option>
+                <option>Thoughtful Sue</option>
               </select>
             </div>
         }

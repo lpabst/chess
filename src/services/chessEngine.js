@@ -1,10 +1,26 @@
+const axios = require('axios');
+// var stockfish = require('stockfish');
+// stockfish = stockfish();
+
+// stockfish.onmessage = function(event) {
+//     let result = event.data ? event.data : event;
+//     console.log(result);
+//     this.result = result;
+//     return result;
+// };
+
+// this.result = '';
+
 module.exports = {
-    getComputerMove: function(level, board, moves){
+    getComputerMove: function(level, board, moves, whoseTurn){
         if (level === 0){
-            return this.pickRandomMove(board, moves);
+            return this.pickRandomMove(board, moves, whoseTurn);
         }
         else if (level === 1){
-            return this.aggressiveMike(board, moves);
+            return this.aggressiveMike(board, moves, whoseTurn);
+        }
+        else if (level > 1){
+            return this.getStockfishMove(level, board, moves, whoseTurn);
         }
     },
 
@@ -22,7 +38,44 @@ module.exports = {
         return false;
     },
 
-    pickRandomMove: function(board, moves){
+    fen: function(board, whoseTurn){
+        // I built my board upside down, so this is to get everything in the right order
+        board = board.reverse();
+        for (let arr in board){
+            board[arr] = board[arr].reverse();
+        }
+
+        // Builds the FEN string to send to stockfish AI
+        let str = '';
+        for (let i = 0; i < 8; i++){
+            let emptyCount = 0;
+            for (let j = 0; j < 8; j++){
+                if (board[i][j]){
+                    let piece = board[i][j].replace(/h/, 'n');
+                    piece = piece.charAt(0) === 'w' ? piece.substring(1).toUpperCase() : piece.substring(1).toLowerCase();
+                    if (emptyCount > 0){
+                        piece = emptyCount + piece;
+                        emptyCount = 0;
+                    }
+                    str += piece;
+                }else{
+                    emptyCount++;
+                }
+            }
+
+            str += emptyCount > 0 ? emptyCount : '';
+
+            if (i < 7){
+                str += '/';
+            }
+        }
+
+        str += ' ' + whoseTurn + ' - - 3 3';
+        return str;
+
+    },
+
+    pickRandomMove: function(board, moves, whoseTurn){
         let searching = true;
         let randomMove;
         let i, j;
@@ -52,7 +105,7 @@ module.exports = {
         return board;
     },
 
-    aggressiveMike: function(board, moves){
+    aggressiveMike: function(board, moves, whoseTurn){
         const points = {
             'q': 8,
             'r': 5,
@@ -91,7 +144,7 @@ module.exports = {
         }
 
         if (movePoints === 0){
-            return this.pickRandomMove(board, moves);
+            return this.pickRandomMove(board, moves, whoseTurn);
         }
 
         board[newLocation[0]][newLocation[1]] = pieceToMove;
@@ -99,5 +152,35 @@ module.exports = {
 
         return board;
     },
+
+    getStockfishMove: function(level, board, moves, whoseTurn){
+        let fen = this.fen(board, whoseTurn);
+        axios.post('/api/getStockfishMove', {
+            fen: fen,
+            level: level
+        })
+        .then( response => {
+            if (response.data.match(/bestmove/)){
+                // if we get a bestmove back, make that move here
+                let move = response.data.match(/bestmove (.*) bestmove/)[1];
+                move = move.split('');
+
+                let letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+                let i = letters.indexOf(move[0]);
+                let j = letters[1];
+                console.log([i, j]);
+
+                return this.pickRandomMove(board, moves, whoseTurn);
+            }else{
+                // if no bestmove data was returned, pick a random move
+                return this.pickRandomMove(board, moves, whoseTurn);
+            }
+        })
+        .catch( err => {
+            // if it errors out, pick a random move
+            return this.pickRandomMove(board, moves, whoseTurn);
+        })
+
+    }
 
 }
