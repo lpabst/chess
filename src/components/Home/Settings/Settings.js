@@ -17,7 +17,16 @@ class Settings extends Component {
       'Jack The Monkey': 0,
       'Aggressive Mike': 1,
       'Thoughtful Sue': 2,
+      'Sue\'s Older Sister': 3,
+      'Chess Tutor': 5,
+      'Local Tourny Champ': 6,
+      'State Tourny Champ': 7,
+      'Chess Master': 8,
+      'Grand Master': 10,
+      'Stockfish': 12,
     }
+
+    // The diff selected here is how many levels deep stockfish goes in its analysis (except levels 0 & 1 which are built locally)
     var diff = difficulty[newVal];
     
     this.props.updateState(diff, 'aiDifficulty');
@@ -65,6 +74,13 @@ class Settings extends Component {
                 <option>Jack The Monkey</option>
                 <option>Aggressive Mike</option>
                 <option>Thoughtful Sue</option>
+                <option>Sue's Older Sister</option>
+                <option>Chess Tutor</option>
+                <option>Local Tourny Champ</option>
+                <option>State Tourny Champ</option>
+                <option>Chess Master</option>
+                <option>Grand Master</option>
+                <option>Stockfish</option>
               </select>
             </div>
         }
