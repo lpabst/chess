@@ -29,12 +29,14 @@ var stockfish = require('stockfish')();
 stockfish.onmessage = function(event) {
   let result = event.data ? event.data : event;
   sendResult = result;
+  console.log(sendResult);
 };
 
 
 //////////Endpoints for the front end
 app.post('/api/getStockfishMove', function(req, res){
-
+  
+  sendResult = 'blank';
   let {fen, level} = req.body;
   console.log(fen);
   console.log(level);
@@ -58,5 +60,8 @@ app.post('/api/getStockfishMove', function(req, res){
   awaitResult();
 
 })
+
+stockfish.postMessage('position fen rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2');
+stockfish.postMessage("go depth 2");
 
 app.listen(config.port, console.log("you are now connected on " + config.port));

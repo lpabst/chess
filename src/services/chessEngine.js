@@ -161,7 +161,7 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
     })
     .then( response => {
         if (response.data.match(/bestmove/)){
-        /******************** I HAVE THE WRONG LOGIC HERE FOR CHESS d5f5 doesn't mean move d5 to f5... **********************/
+            
             // if we get a bestmove back, make that move here
             let move = response.data.match(/bestmove (.*) bestmove/)[1];
             move = move.split('');
@@ -173,12 +173,35 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
             let pj = letters.indexOf(move[0]);
             let mi = numbers.indexOf(move[3]);
             let mj = letters.indexOf(move[2]);
+
+            // Make sure the suggested move is an available move in our moves array
+            // My moves array is inverted, so get the flipped indexes
+            let pieceI = 7 - pi;
+            let pieceJ = 7 - pj;
+            let movesI = 7 - mi;
+            let movesJ = 7 - mj;
+
+            let movesArr = moves[pieceI][pieceJ] || [];
+            let validMove = false;
+
+            // For the valid moves for the selected piece, check each one to see if any of them match the suggested move
+            for (let i = 0; i < movesArr.length; i++){
+                if (movesArr[i][0] === movesI && movesArr[i][1] === movesJ){
+                    validMove = true;
+                }
+            }
+
+            // if no valid move was found (en passant isn't added in to my valid moves) pick a random move instead.
+            if (!validMove){
+                console.log('not a valid move, picking a random move instead');
+                return pickRandomMove.call(this, originalBoard, moves, whoseTurn, newTurn);
+            }
             
+            // Otherwise, make the move suggested by Stockfish!
             let piece = board[pi][pj];
             board[mi][mj] = piece;
             board[pi][pj] = '';
 
-            console.log(board);
             board = flipBoard(board);
             
             return updateBoardOnState.call(this, board, newTurn);
