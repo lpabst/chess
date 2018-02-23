@@ -33,7 +33,7 @@ class Square extends Component {
             border: squareBorder
         }
         let pieceStyle = piece ? {
-            background: "url('/media/" + piece + ".jpg')center center /cover no-repeat",
+            background: "url('/media/" + piece + ".png')center center /cover no-repeat",
             transform: this.props.rotate
         }
         : {}
