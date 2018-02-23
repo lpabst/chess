@@ -2,10 +2,10 @@
 
 This is a chess game built using the React Framework
 
-Current State: Able to play the game like normal, but without au passant. 3 levels of AI, first picks moves at random, 2nd plays aggressively, and the 3rd ties into the Stockfish AI (but it's buggy: my code doesn't quite read the results right);
+Current State: Able to play the game like normal, but without au passant. 3 levels of AI, first picks moves at random, 2nd plays aggressively, and the 3rd ties into the Stockfish AI 
 
 Future Steps: 
-    - finish writing the stockfish code so that it works correctly in chessEngine.js
+    - Add more levels that go deeper into the Stockfish analysis
     - Alert user when they are put in check
     - Add in au passant 
     - When pawn reaches last row, allow choice instead of forcing queen as replacement
