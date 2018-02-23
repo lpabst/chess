@@ -8,21 +8,18 @@ function updateBoardOnState(board, newTurn){
         stalemateMoveCount ++;
     }
 
-    // Wait for a short time, then make the random move and start the user's turn again
-    // setTimeout(() => {
-        this.setState({
-            board: board,
-            pieceSelected: false,
-            selectedPieceType: '',
-            selectedPieceLocation: [],
-            whoseTurn: newTurn,
-            availableMoves: [],
-            firstTurn: false,
-            stalemateMoveCount: stalemateMoveCount,
-        }, () => {
-            this.startTurn()
-        })
-    // }, 250) 
+    this.setState({
+        board: board,
+        pieceSelected: false,
+        selectedPieceType: '',
+        selectedPieceLocation: [],
+        whoseTurn: newTurn,
+        availableMoves: [],
+        firstTurn: false,
+        stalemateMoveCount: stalemateMoveCount,
+    }, () => {
+        this.startTurn()
+    })
       
 }
 
@@ -165,7 +162,8 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
             let move = response.data.match(/bestmove (.*) bestmove/)[1];
             
             // if we don't get a best move back, pick a random move
-            if (!move){
+            if (!move || move.length < 4){
+                console.log('best move doesnt have 4 or more, picking random move');
                 return pickRandomMove.call(this, originalBoard, moves, whoseTurn, newTurn);
             }
 
@@ -210,18 +208,18 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
             board = flipBoard(board);
             
             return updateBoardOnState.call(this, board, newTurn);
-        /****************** NEED TO FIX THE CODE ABOVE *********************/
+
         }else{
             // if no bestmove data was returned, pick a random move
             board = flipBoard(board);
-            console.log('random move');
+            console.log('no bestmove match found, picking a random move');
             return pickRandomMove.call(this, board, moves, whoseTurn, newTurn);
         }
     })
     .catch( err => {
         // if it errors out, pick a random move
         board = flipBoard(board);
-        console.log('random move');
+        console.log('server error, picking a random move');
         return pickRandomMove.call(this, board, moves, whoseTurn, newTurn);
     })
 
