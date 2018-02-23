@@ -23,8 +23,8 @@ var userController = require("./userController.js");
 
 
 // Chess engine Stockfish AI
-var sendResult = 'blank';
 var stockfish = require('stockfish')();
+var sendResult = 'blank';
 
 stockfish.onmessage = function(event) {
   let result = event.data ? event.data : event;

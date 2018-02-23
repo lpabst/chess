@@ -162,8 +162,13 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
     .then( response => {
         if (response.data.match(/bestmove/)){
             
-            // if we get a bestmove back, make that move here
             let move = response.data.match(/bestmove (.*) bestmove/)[1];
+            
+            // if we don't get a best move back, pick a random move
+            if (!move){
+                return pickRandomMove.call(this, originalBoard, moves, whoseTurn, newTurn);
+            }
+
             move = move.split('');
 
             let letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
