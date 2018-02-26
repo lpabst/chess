@@ -129,6 +129,11 @@ function aggressiveMike(board, moves, whoseTurn, newTurn){
         return pickRandomMove.call(this, board, moves, whoseTurn, newTurn);
     }
 
+    if (pieceToMove.substring(1) === 'p' && (newLocation[0] === 0 || newLocation[0] === 7)){
+        // If a pawn reaches the last row, promote to queen
+        pieceToMove = pieceToMove.substring(0, 1) + 'q';
+    }
+
     board[newLocation[0]][newLocation[1]] = pieceToMove;
     board[oldLocation[0]][oldLocation[1]] = '';
 
@@ -202,6 +207,10 @@ function getStockfishMove(level, originalBoard, moves, whoseTurn, newTurn){
             
             // Otherwise, make the move suggested by Stockfish!
             let piece = board[pi][pj];
+            if (piece.substring(1) === 'p' && (mi === 0 || mi === 7)){
+                // If pawn reaches the last row, promote to queen
+                piece = piece.substring(0, 1) + 'q';
+            }
             board[mi][mj] = piece;
             board[pi][pj] = '';
 
