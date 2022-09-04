@@ -12,7 +12,7 @@ class Home extends Component {
       playAs: "White",
       player2: "Computer",
       opponentAI: true,
-      aiDifficulty: 2,
+      aiDifficulty: 0,
       aiPlayer: "Thoughtful Sue",
       rotateBoard: "No",
       boardRotation: 180,
@@ -69,6 +69,11 @@ class Home extends Component {
     triggers the function that makes a move for the computer
   */
   startTurn() {
+    if (this.state.gameover) {
+      console.log("game over do nothing");
+      return;
+    }
+
     let allMoves = this.state.game.getAllAvailableMoves();
 
     if (
@@ -102,20 +107,24 @@ class Home extends Component {
 
   // ends the game
   endGame() {
+    console.log("end game");
     // Check if it's stalemate or checkmate
     let endGameMessage;
     let kingLocation = this.state.game.getKingLocation(
       this.state.game.whoseTurn
     );
-    let isInCheck = this.state.game.testForCheck(kingLocation);
+    let isInCheck = this.state.game.testForCheck(
+      this.state.game.board,
+      kingLocation
+    );
 
     if (isInCheck) {
-      let whoWon = this.state.whoseTurn === "w" ? "Black" : "White";
+      let whoWon = this.state.game.whoseTurn === "w" ? "Black" : "White";
       endGameMessage = "Checkmate!!! " + whoWon + " wins!";
     } else {
       endGameMessage = "StaleMate! It's a tie game";
     }
-
+    console.log("set end game message...");
     this.setState({
       gameover: true,
       warningMessage: endGameMessage,
@@ -129,6 +138,7 @@ class Home extends Component {
 
     // computer chess engine is outsourced to src/services/chessEngine.js and is imported as "ai"
     ai.getComputerMove(aiDifficulty, this.state.game);
+    this.setState({ game: this.state.game });
   }
 
   // Select a piece
@@ -206,9 +216,15 @@ class Home extends Component {
             this.state.selectedPiece.location,
             [i, j]
           );
-          this.setState({
-            selectedPiece: null,
-          });
+          this.setState(
+            {
+              selectedPiece: null,
+            },
+            () => {
+              // start the next turn
+              this.startTurn();
+            }
+          );
         }
       }
     }

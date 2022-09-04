@@ -43,7 +43,7 @@ class Square extends Component {
       // j % 2 === i % 2
       //   ? 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQE6ctrqwxsbjV8wTdAL83MzpH6XoVfLfRYSXv8Lmf530pDjWrI")'
       //   : "url('https://4my3boyz.com/content/images/thumbs/0014032_danscapes-spring-wood-grain-dark-brown-cotton-fabric_500.jpeg')",
-      background: j % 2 === i % 2 ? "#916326" : "#edc795",
+      background: j % 2 === i % 2 ? "#edc795" : "#916326",
       border: squareBorder,
     };
     let pieceStyle = piece

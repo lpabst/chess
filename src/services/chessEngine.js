@@ -3,7 +3,7 @@ const chessEngineV2 = require("./chessEngineV2");
 const { copyJsObj } = require("./helpers");
 
 function pickRandomMove(game) {
-  const moves = game.getAllAvailableMoves();
+  const moves = game.getAllAvailableMoves().moves;
   let searching = true;
   let randomMove;
   let i, j;
@@ -24,7 +24,7 @@ function pickRandomMove(game) {
 }
 
 function aggressiveMike(game) {
-  const moves = game.getAllAvailableMoves();
+  const moves = game.getAllAvailableMoves().moves;
   const points = {
     q: 8,
     r: 5,
@@ -127,7 +127,7 @@ function getStockfishMove(level, game) {
         let movesJ = 7 - mj;
 
         // For the valid moves for the selected piece, check each one to see if any of them match the suggested move
-        const moves = game.getAllAvailableMoves();
+        const moves = game.getAllAvailableMoves().moves;
         let movesArr = moves[pieceI][pieceJ] || [];
         let validMove = false;
         for (let i = 0; i < movesArr.length; i++) {

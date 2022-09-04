@@ -25,7 +25,7 @@ function makeBestMove(game) {
 
 function calculateBestMove(board, game) {
   const originalBoard = copyJsObj(board);
-  const moves = game.getAllAvailableMoves();
+  const moves = game.getAllAvailableMoves().moves;
   metrics.minimixPerTurn = 0;
   let bestMove = null;
   let bestValue = -999999;
@@ -97,7 +97,7 @@ function minimax({ depth, isMaximizingPlayer, game }) {
   metrics.minimixPerTurn++;
   metrics.minimaxTotal++;
   const originalBoard = copyJsObj(game.board);
-  const moves = game.getAllAvailableMoves();
+  const moves = game.getAllAvailableMoves().moves;
 
   let bestMove = isMaximizingPlayer ? -99999 : 99999;
   for (let i = 0; i < moves.length; i++) {
