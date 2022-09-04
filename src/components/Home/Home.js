@@ -19,10 +19,7 @@ class Home extends Component {
       firstTurn: true,
       game: new Game(),
       allPiecesMoves: [],
-      pieceSelected: false,
-      selectedPieceType: "",
-      selectedPieceLocation: [],
-      availableMoves: [],
+      selectedPiece: null,
       warningMessage: "",
       errorPieceLocations: [],
       showSettings: false,
@@ -47,6 +44,7 @@ class Home extends Component {
   // Resets state and starts a new game
   startNewGame() {
     const game = new Game();
+    window.game = game;
     let rotate = this.state.playAs === "White" ? 180 : 0;
 
     this.setState(
@@ -55,10 +53,7 @@ class Home extends Component {
         boardRotation: rotate,
         firstTurn: true,
         game: game,
-        pieceSelected: false,
-        selectedPieceType: "",
-        selectedPieceLocation: [],
-        availableMoves: [],
+        selectedPiece: null,
         warningMessage: "",
         errorPieceLocations: [],
         showSettings: false,
@@ -131,8 +126,6 @@ class Home extends Component {
   getComputerMove() {
     let { aiDifficulty } = this.state;
     let whoseTurn = this.state.game.whoseTurn;
-    let moves = this.state.allPiecesMoves.moves;
-    let newTurn = whoseTurn === "b" ? "w" : "b";
 
     // computer chess engine is outsourced to src/services/chessEngine.js and is imported as "ai"
     ai.getComputerMove(aiDifficulty, this.state.game);
@@ -140,14 +133,16 @@ class Home extends Component {
 
   // Select a piece
   selectPiece(i, j) {
-    let availableMoves = this.state.allPiecesMoves.moves[i][j];
+    const allMoves = this.state.game.getAllAvailableMoves();
+    let availableMovesForSelectedPiece = allMoves.moves[i][j];
     this.setState({
-      pieceSelected: true,
-      selectedPieceType: this.state.board[i][j],
-      selectedPieceLocation: [i, j],
+      selectedPiece: {
+        type: this.state.game.board[i][j],
+        location: [i, j],
+        availableMoves: availableMovesForSelectedPiece,
+      },
       warningMessage: "",
       errorPieceLocations: [],
-      availableMoves: availableMoves,
     });
   }
 
@@ -164,50 +159,56 @@ class Home extends Component {
       return;
     }
 
-    const baord = this.state.game.board;
-    let { availableMoves } = this.state;
+    let { selectedPiece } = this.state;
 
     // if there's no piece selected and the user clicked on a piece of their own color, set that piece to the selectedPiece, and get the available moves for that piece
     if (
-      !this.state.pieceSelected &&
+      !this.state.selectedPiece &&
       this.state.game.board[i][j] &&
-      this.state.game.board[i][j].charAt(0) === this.state.whoseTurn
+      this.state.game.board[i][j].charAt(0) === this.state.game.whoseTurn
     ) {
       this.selectPiece(i, j);
     }
 
     // If the user clicks on the piece that is already the active piece, unactivate it
     else if (
-      this.state.pieceSelected &&
-      this.state.selectedPieceLocation[0] === i &&
-      this.state.selectedPieceLocation[1] === j
+      this.state.selectedPiece &&
+      selectedPiece.location[0] === i &&
+      selectedPiece.location[1] === j
     ) {
       this.setState({
-        pieceSelected: false,
-        selectedPieceType: "",
-        selectedPieceLocation: [],
-        availableMoves: [],
+        selectedPiece: null,
       });
     }
 
     // if there IS a piece selected, but the user clicks on a different piece of their own color, set the selected piece to the new selection
     else if (
-      this.state.pieceSelected &&
+      this.state.selectedPiece &&
       this.state.game.board[i][j].charAt(0) ===
-        this.state.selectedPieceType.charAt(0)
+        this.state.selectedPiece.type.charAt(0)
     ) {
       this.selectPiece(i, j);
     }
 
     // If there is a piece selected and they didn't click on another of their own pieces
-    else if (this.state.pieceSelected) {
+    else if (this.state.selectedPiece) {
       // Check to see if the square the user clicked on is a valid move for the piece that was selected. If so, move it to that new spot.
-      for (let index = 0; index < this.state.availableMoves.length; index++) {
-        if (availableMoves[index][0] === i && availableMoves[index][1] === j) {
+      for (
+        let index = 0;
+        index < selectedPiece.availableMoves.length;
+        index++
+      ) {
+        if (
+          selectedPiece.availableMoves[index][0] === i &&
+          selectedPiece.availableMoves[index][1] === j
+        ) {
           this.state.game.movePieceToNewSquare(
-            this.state.selectedPieceLocation,
+            this.state.selectedPiece.location,
             [i, j]
           );
+          this.setState({
+            selectedPiece: null,
+          });
         }
       }
     }
@@ -253,8 +254,7 @@ class Home extends Component {
             piece={item}
             handleClick={this.clickSquare}
             location={[i, j]}
-            selectedPieceLocation={this.state.selectedPieceLocation}
-            availableMoves={this.state.availableMoves}
+            selectedPiece={this.state.selectedPiece}
             errorPieceLocations={this.state.errorPieceLocations}
           />
         );
@@ -273,7 +273,7 @@ class Home extends Component {
     return (
       <div className="home">
         <p className="turn">
-          {this.state.whoseTurn === "w" ? "White's turn" : "Black's turn"}
+          {this.state.game.whoseTurn === "w" ? "White's turn" : "Black's turn"}
         </p>
         <p className="warning">{this.state.warningMessage}</p>
         <button onClick={this.toggleSettings} className="settings_toggle">

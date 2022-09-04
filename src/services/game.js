@@ -1,13 +1,8 @@
 import { copyJsObj } from "./helpers";
 
-const players = {
-  white: "w",
-  black: "b",
-};
-
 function Game(board = null) {
   this.board = board || new Board();
-  this.whoseTurn = players.white;
+  this.whoseTurn = "w";
   this.firstTurn = true;
   this.stalemateMoveCount = 0;
   this.moveHistory = [];
@@ -314,8 +309,7 @@ function Game(board = null) {
 
   // Based on a specific board setup, tests if the player whose turn it is is in check.
   this.testForCheck = function (board, kingLocation) {
-    let opponentsTurn =
-      this.whoseTurn === players.white ? players.black : players.white;
+    let opponentsTurn = this.whoseTurn === "w" ? "b" : "w";
     let opponentsMoves = this.getAllAvailableMoves(
       board,
       opponentsTurn,
@@ -340,7 +334,6 @@ function Game(board = null) {
     newLocation,
     addMoveToHistory = true
   ) {
-    const board = copyJsObj(this.board);
     let piece = this.board[oldLocation[0]][oldLocation[1]];
     const pieceColor = piece.charAt(0);
     const pieceType = piece.charAt(1);
@@ -352,16 +345,18 @@ function Game(board = null) {
 
     // If they "castle" move their king AND their castle simultaneously
     if (pieceType === "k" && newLocation[1] === oldLocation[1] - 2) {
-      board[oldLocation[0]][oldLocation[1] - 1] = piece.substring(0, 1) + "r";
-      board[oldLocation[0]][oldLocation[1] - 3] = "";
+      this.board[oldLocation[0]][oldLocation[1] - 1] =
+        piece.substring(0, 1) + "r";
+      this.board[oldLocation[0]][oldLocation[1] - 3] = "";
     }
     if (pieceType === "k" && newLocation[1] === oldLocation[1] + 2) {
-      board[oldLocation[0]][oldLocation[1] + 1] = piece.substring(0, 1) + "r";
-      board[oldLocation[0]][oldLocation[1] + 4] = "";
+      this.board[oldLocation[0]][oldLocation[1] + 1] =
+        piece.substring(0, 1) + "r";
+      this.board[oldLocation[0]][oldLocation[1] + 4] = "";
     }
 
-    board[newLocation[0]][newLocation[1]] = piece;
-    board[oldLocation[0]][oldLocation[1]] = "";
+    this.board[newLocation[0]][newLocation[1]] = piece;
+    this.board[oldLocation[0]][oldLocation[1]] = "";
 
     // track movement of kings and rooks to limit castling
     if (pieceType === "k") {
@@ -394,8 +389,7 @@ function Game(board = null) {
   };
 
   this.toggleWhoseTurnItIs = function () {
-    this.whoseTurn =
-      this.whoseTurn === players.white ? players.black : players.white;
+    this.whoseTurn = this.whoseTurn === "w" ? "b" : "w";
   };
 
   // counts how many pieces each player has left and sets it on state
