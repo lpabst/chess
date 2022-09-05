@@ -70,7 +70,18 @@ function aggressiveMike(game) {
 
 function lorensChessEngine(game) {
   try {
-    chessEngineV2.makeBestMove(game);
+    const engine = new chessEngineV2.ChessEngine({
+      board: game.board,
+      castlingInfo: game.castling,
+      whoseTurn: game.whoseTurn,
+    });
+    const bestMove = engine.getBestMove();
+    // const bestMove = chessEngineV2.getBestMove(
+    //   game.board,
+    //   game.castlingInfo,
+    //   game.whoseTurn
+    // );
+    game.movePieceToNewSquare(bestMove.from, bestMove.to);
   } catch (e) {
     console.log(
       "Lorens chess engine threw an error, making a random move instead"

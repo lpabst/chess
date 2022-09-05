@@ -12,7 +12,7 @@ class Home extends Component {
       playAs: "White",
       player2: "Computer",
       opponentAI: true,
-      aiDifficulty: 0,
+      aiDifficulty: 2,
       aiPlayer: "Thoughtful Sue",
       rotateBoard: "No",
       boardRotation: 180,

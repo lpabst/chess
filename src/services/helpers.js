@@ -16,4 +16,8 @@ function copyJsObj(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-export { randomString, copyJsObj };
+function opponentsTurn(whoseTurn) {
+  return whoseTurn === "w" ? "b" : "w";
+}
+
+export { randomString, copyJsObj, opponentsTurn };
